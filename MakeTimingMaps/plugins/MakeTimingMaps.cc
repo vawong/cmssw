@@ -79,6 +79,7 @@ class MakeTimingMaps : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       void ClearVariables();
       void SaveHistToFile();
       
+      double Method0Energy;
       double RecHitEnergy;
       double RecHitTime;
       double iEta;
@@ -118,6 +119,14 @@ class MakeTimingMaps : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       TH1F *hPart1;
       TH1F *hPart3;
       TH1F *hPart2;
+      
+      TH1F *hMOptM0_HB_5_10;
+      TH1F *hMOptM0_HB_10_20;
+      TH1F *hMOptM0_HB_20;
+  
+      TH1F *hMOptM0_HE_5_10;
+      TH1F *hMOptM0_HE_10_20;
+      TH1F *hMOptM0_HE_20;
       
       TH2F *occupancy_d1;
       TH2F *occupancy_d2;
@@ -218,6 +227,16 @@ MakeTimingMaps::MakeTimingMaps(const edm::ParameterSet& iConfig)
   hPart1 = FileService->make<TH1F>("hPart1","average avg time partition 1", 25, -12.5, 12.5);
   hPart2 = FileService->make<TH1F>("hPart2","average avg time partition 2", 25, -12.5, 12.5);
   hPart3 = FileService->make<TH1F>("hPart3","average avg time partition 3", 25, -12.5, 12.5);
+  
+  
+  hMOptM0_HB_5_10  = FileService->make<TH1F>("hMOptM0_HB_5_10","Method 2 to Method 0 energy ratio", 50, -12.5, 12.5);
+  hMOptM0_HB_10_20 = FileService->make<TH1F>("hMOptM0_HB_10_20","Method 2 to Method 0 energy ratio", 50, -12.5, 12.5);
+  hMOptM0_HB_20    = FileService->make<TH1F>("hMOptM0_HB_20","Method 2 to Method 0 energy ratio", 50, -12.5, 12.5);
+  
+  hMOptM0_HE_5_10  = FileService->make<TH1F>("hMOptM0_HE_5_10","Method 2 to Method 0 energy ratio", 50, -12.5, 12.5);
+  hMOptM0_HE_10_20 = FileService->make<TH1F>("hMOptM0_HE_10_20","Method 2 to Method 0 energy ratio", 50, -12.5, 12.5);
+  hMOptM0_HE_20    = FileService->make<TH1F>("hMOptM0_HE_20","Method 2 to Method 0 energy ratio", 50, -12.5, 12.5);
+  
 
 }
 
@@ -249,7 +268,7 @@ MakeTimingMaps::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
 
-Handle<HBHERecHitCollection> hRecHits;
+  Handle<HBHERecHitCollection> hRecHits;
    Handle<PCaloHitContainer> hSimHits;
    iEvent.getByLabel(InputTag(sHBHERecHitCollection),hRecHits);
    
@@ -272,10 +291,18 @@ Handle<HBHERecHitCollection> hRecHits;
     //if((*hRecHits)[i].energy() < 1) continue;
     HcalDetId detID_rh = (*hRecHits)[i].id().rawId();
     depth = (*hRecHits)[i].id().depth();
+    Method0Energy = (*hRecHits)[i].eraw();
     RecHitEnergy = (*hRecHits)[i].energy();
     RecHitTime = (*hRecHits)[i].time();
     iEta = detID_rh.ieta();
     iPhi = detID_rh.iphi();
+    
+    // separate by HB, HE
+//     if(fabs(iEta) < 15){
+//       if(Method0Energy!=0&&Method0Energy>5&&Method0Energy<10) 
+//       else if
+//     }
+    
    
     if(RecHitEnergy> 1.0){
 //       ++nrh;
