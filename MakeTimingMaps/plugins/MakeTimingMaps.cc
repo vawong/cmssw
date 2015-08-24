@@ -114,19 +114,19 @@ class MakeTimingMaps : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       TH1F ***hTiming_Depth2 = new TH1F**[59];
       TH1F ***hTiming_Depth3 = new TH1F**[6];
       
+      TH1F **hM2M0_HB_5_10 = new TH1F*[3];
+      TH1F **hM2M0_HB_10_20 = new TH1F*[3];
+      TH1F **hM2M0_HB_20 = new TH1F*[3];
+      
+      TH1F **hM2M0_HE_5_10 = new TH1F*[3];
+      TH1F **hM2M0_HE_10_20 = new TH1F*[3];
+      TH1F **hM2M0_HE_20 = new TH1F*[3];
+      
       int runNumber_;
       
       TH1F *hPart1;
       TH1F *hPart3;
       TH1F *hPart2;
-      
-      TH1F *hMOptM0_HB_5_10;
-      TH1F *hMOptM0_HB_10_20;
-      TH1F *hMOptM0_HB_20;
-  
-      TH1F *hMOptM0_HE_5_10;
-      TH1F *hMOptM0_HE_10_20;
-      TH1F *hMOptM0_HE_20;
       
       TH2F *occupancy_d1;
       TH2F *occupancy_d2;
@@ -229,14 +229,15 @@ MakeTimingMaps::MakeTimingMaps(const edm::ParameterSet& iConfig)
   hPart3 = FileService->make<TH1F>("hPart3","average avg time partition 3", 25, -12.5, 12.5);
   
   
-  hMOptM0_HB_5_10  = FileService->make<TH1F>("hMOptM0_HB_5_10","Method 2 to Method 0 energy ratio", 50, -12.5, 12.5);
-  hMOptM0_HB_10_20 = FileService->make<TH1F>("hMOptM0_HB_10_20","Method 2 to Method 0 energy ratio", 50, -12.5, 12.5);
-  hMOptM0_HB_20    = FileService->make<TH1F>("hMOptM0_HB_20","Method 2 to Method 0 energy ratio", 50, -12.5, 12.5);
-  
-  hMOptM0_HE_5_10  = FileService->make<TH1F>("hMOptM0_HE_5_10","Method 2 to Method 0 energy ratio", 50, -12.5, 12.5);
-  hMOptM0_HE_10_20 = FileService->make<TH1F>("hMOptM0_HE_10_20","Method 2 to Method 0 energy ratio", 50, -12.5, 12.5);
-  hMOptM0_HE_20    = FileService->make<TH1F>("hMOptM0_HE_20","Method 2 to Method 0 energy ratio", 50, -12.5, 12.5);
-  
+  for(int i = 0; i < 3; i++){
+    hM2M0_HB_5_10[i]  = FileService->make<TH1F>(("hM2M0_HB_5_10_p"+int2string(i+1)).c_str(),  ("M2/M0, HB part"+int2string(i+1)+" 5-10GeV").c_str(),  50, 0.0, 2.0);
+    hM2M0_HB_10_20[i] = FileService->make<TH1F>(("hM2M0_HB_10_20_p"+int2string(i+1)).c_str(), ("M2/M0, HB part"+int2string(i+1)+" 10-20GeV").c_str(), 50, 0.0, 2.0);
+    hM2M0_HB_20[i]    = FileService->make<TH1F>(("hM2M0_HB_20_p"+int2string(i+1)).c_str(),    ("M2/M0, HB part"+int2string(i+1)+" >20GeV").c_str(),   50, 0.0, 2.0);
+    
+    hM2M0_HE_5_10[i]  = FileService->make<TH1F>(("hM2M0_HE_5_10_p"+int2string(i+1)).c_str(),  ("M2/M0, HE part"+int2string(i+1)+" 5-10GeV").c_str(),  50, 0.0, 2.0);
+    hM2M0_HE_10_20[i] = FileService->make<TH1F>(("hM2M0_HE_10_20_p"+int2string(i+1)).c_str(), ("M2/M0, HE part"+int2string(i+1)+" 10-20GeV").c_str(), 50, 0.0, 2.0);
+    hM2M0_HE_20[i]    = FileService->make<TH1F>(("hM2M0_HE_20_p"+int2string(i+1)).c_str(),    ("M2/M0, HE part"+int2string(i+1)+" >20GeV").c_str(),   50, 0.0, 2.0);
+  }
 
 }
 
@@ -288,7 +289,6 @@ MakeTimingMaps::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     EvtNumber = iEvent.id().event();
     if(RunNumber != runNumber_ /*&& RunNumber!=251244 && RunNumber!=251252 && RunNumber!=251562 && RunNumber!=251561 && RunNumber!=251643*/) continue;
     
-    //if((*hRecHits)[i].energy() < 1) continue;
     HcalDetId detID_rh = (*hRecHits)[i].id().rawId();
     depth = (*hRecHits)[i].id().depth();
     Method0Energy = (*hRecHits)[i].eraw();
@@ -296,35 +296,57 @@ MakeTimingMaps::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     RecHitTime = (*hRecHits)[i].time();
     iEta = detID_rh.ieta();
     iPhi = detID_rh.iphi();
-    
-    // separate by HB, HE
-//     if(fabs(iEta) < 15){
-//       if(Method0Energy!=0&&Method0Energy>5&&Method0Energy<10) 
-//       else if
-//     }
-    
    
     if(RecHitEnergy> 1.0){
-//       ++nrh;
       if(detID_rh.iphi()>=3 && detID_rh.iphi() < 27){
         np1+=RecHitTime;
         ++nrh1;
-//           hHBHETiming_SmallStats->Fill(1,RecHitTime);
-//           hPart1->Fill(RecHitTime);
         }
         if(detID_rh.iphi()>=27 && detID_rh.iphi() < 51){
           np2+=RecHitTime;
           ++nrh2;
-//           hHBHETiming_SmallStats->Fill(2,RecHitTime);
-//           hPart2->Fill(RecHitTime);
         }
         if(detID_rh.iphi()>=51 || detID_rh.iphi() < 3){
           np3+=RecHitTime;
           ++nrh3;
-//           hHBHETiming_SmallStats->Fill(3,RecHitTime);
-//           hPart3->Fill(RecHitTime);
         }
     }
+    
+    
+    // Fill the Method 2/ Method 0 rechit plots
+    if(Method0Energy > 5 && Method0Energy < 10){
+      if(detID_rh.subdet() == HcalBarrel){
+        if(iPhi >=  3 && iPhi < 27) hM2M0_HB_5_10[0]->Fill(RecHitEnergy/Method0Energy);
+        if(iPhi >= 27 && iPhi < 51) hM2M0_HB_5_10[1]->Fill(RecHitEnergy/Method0Energy);
+        if(iPhi >= 51 || iPhi < 3 ) hM2M0_HB_5_10[2]->Fill(RecHitEnergy/Method0Energy);
+      } else if (detID_rh.subdet() == HcalEndcap) {
+        if(iPhi >=  3 && iPhi < 27) hM2M0_HE_5_10[0]->Fill(RecHitEnergy/Method0Energy);
+        if(iPhi >= 27 && iPhi < 51) hM2M0_HE_5_10[1]->Fill(RecHitEnergy/Method0Energy);
+        if(iPhi >= 51 || iPhi < 3 ) hM2M0_HE_5_10[2]->Fill(RecHitEnergy/Method0Energy);
+      }
+    } else if (Method0Energy > 10 && Method0Energy < 20) {
+      if(detID_rh.subdet() == HcalBarrel){
+        if(iPhi >=  3 && iPhi < 27) hM2M0_HB_10_20[0]->Fill(RecHitEnergy/Method0Energy);
+        if(iPhi >= 27 && iPhi < 51) hM2M0_HB_10_20[1]->Fill(RecHitEnergy/Method0Energy);
+        if(iPhi >= 51 || iPhi < 3 ) hM2M0_HB_10_20[2]->Fill(RecHitEnergy/Method0Energy);
+      } else if (detID_rh.subdet() == HcalEndcap) {
+        if(iPhi >=  3 && iPhi < 27) hM2M0_HE_10_20[0]->Fill(RecHitEnergy/Method0Energy);
+        if(iPhi >= 27 && iPhi < 51) hM2M0_HE_10_20[1]->Fill(RecHitEnergy/Method0Energy);
+        if(iPhi >= 51 || iPhi < 3 ) hM2M0_HE_10_20[2]->Fill(RecHitEnergy/Method0Energy);
+      }
+    } else if (Method0Energy < 20){
+      if(detID_rh.subdet() == HcalBarrel){
+        if(iPhi >=  3 && iPhi < 27) hM2M0_HB_5_10[0]->Fill(RecHitEnergy/Method0Energy);
+        if(iPhi >= 27 && iPhi < 51) hM2M0_HB_5_10[1]->Fill(RecHitEnergy/Method0Energy);
+        if(iPhi >= 51 || iPhi < 3 ) hM2M0_HB_5_10[2]->Fill(RecHitEnergy/Method0Energy);
+      } else if (detID_rh.subdet() == HcalEndcap) {
+        if(iPhi >=  3 && iPhi < 27) hM2M0_HE_5_10[0]->Fill(RecHitEnergy/Method0Energy);
+        if(iPhi >= 27 && iPhi < 51) hM2M0_HE_5_10[1]->Fill(RecHitEnergy/Method0Energy);
+        if(iPhi >= 51 || iPhi < 3 ) hM2M0_HE_5_10[2]->Fill(RecHitEnergy/Method0Energy);
+      }
+    }
+    
+    
     
     if(RecHitEnergy > 5.0) {
 //       std::cout << "ieta = " << detID_rh.ieta() << " and index = " << detID_rh.ieta()+29 << std::endl;

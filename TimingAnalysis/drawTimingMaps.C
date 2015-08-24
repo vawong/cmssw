@@ -38,7 +38,7 @@ string int2string(int i) {
 }
 
 
-void drawTimingMaps(std::string inputfile, std::string outputDir, std::string datasetInfo, bool printChannels){
+void drawTimingMaps(std::string inputfile, std::string outputDir, std::string datasetInfo, bool printChannels, bool is25ns){
   
   int nOutliers = 0;
   TFile *_file1 = new TFile(inputfile.c_str());
@@ -139,7 +139,7 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
         
         
         // print histograms for any odd channel timings
-        if(time > 5 || RMS_wide > 11) {
+        if(fabs(time) > 2.5 || (RMS_wide > 11 && !is25ns)) {
           TH1F *holdTime = new TH1F(("Outlier_Depth"+int2string(d+1)+"_ieta"+int2string(ieta)+"_iphi"+int2string(iphi)).c_str(),("Outlier_Depth"+int2string(d+1)+"_ieta"+int2string(ieta)+"_iphi"+int2string(iphi)).c_str(),75,-37.5,37.5);
           std::cout << "looking for... " << ("timingMaps/Depth"+int2string(d+1)+"_ieta"+int2string(ieta)+"_iphi"+int2string(iphi)).c_str() << std::endl;
           holdTime = (TH1F*)_file1->Get(("timingMaps/Depth"+int2string(d+1)+"_ieta"+int2string(ieta)+"_iphi"+int2string(iphi)).c_str());
@@ -171,13 +171,13 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
       if(y <  3  || y >= 51) hTimeFromMeanD1->SetBinContent(x,y,time-meanPart3);
       
       if(printChannels == true){
-        if(/*fabs(time-meanPart1) > 1  && fabs(time-meanPart1) < 5.0 && */y >= 3  && y <  27) {std::cout << "depth 1, iphi " << depth1->GetYaxis()->GetBinCenter(y)
+        if(y >= 3  && y <  27) {std::cout << "depth 1, iphi " << depth1->GetYaxis()->GetBinCenter(y)
           << ", ieta " << depth1->GetXaxis()->GetBinCenter(x) << ", time " << time << std::endl; 
         }
-        if(/*fabs(time-meanPart2) > 1  && fabs(time-meanPart2) < 5.0 && */y >= 27 && y <  51) {std::cout << "depth 1, iphi " << depth1->GetYaxis()->GetBinCenter(y)
+        if(y >= 27 && y <  51) {std::cout << "depth 1, iphi " << depth1->GetYaxis()->GetBinCenter(y)
           << ", ieta " << depth1->GetXaxis()->GetBinCenter(x) << ", time " << time << std::endl;
         }
-        if(/*fabs(time-meanPart3) > 1  && fabs(time-meanPart3) < 5.0 && */(y <  3  || y >= 51)) {std::cout << "depth 1, iphi " << depth1->GetYaxis()->GetBinCenter(y)
+        if((y <  3  || y >= 51)) {std::cout << "depth 1, iphi " << depth1->GetYaxis()->GetBinCenter(y)
           << ", ieta " << depth1->GetXaxis()->GetBinCenter(x) << ", time " << time << std::endl;
         }
       }
