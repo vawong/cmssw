@@ -47,23 +47,27 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
   
   TProfile2D **hChTiming     = new TProfile2D*[3];
   TProfile2D **hChTimingWide = new TProfile2D*[3];
+  TProfile2D **hRatios       = new TProfile2D*[3];
   
   TH2D       **hChOccupy     = new TH2D*[3];
   TH2D       **hRMS          = new TH2D*[3];
   TH2D       **hRMSWide      = new TH2D*[3];
+  TH1D       **hRMSHist      = new TH1D*[3];
+  TH1D       **hTimeHist     = new TH1D*[3];
   
   // make a loop to book the histograms
   for(int it = 0; it < 3; ++it){
     hChTiming[it]     = new TProfile2D(("hTimeDepth"+int2string(it+1)).c_str(),("hTimeDepth"+int2string(it+1)).c_str(),59,-29.5,29.5,72,0.5,72.5, -37.5, 37.5,"s");
-    hChTimingWide[it] = new TProfile2D(("hTimeWideDepth"+int2string(it+1)).c_str(),("hTimeWideDepth"+int2string(it+1)).c_str(),59,-29.5,29.5,72,0.5,72.5, -37.5, 37.5,"s");
+    hChTimingWide[it] = new TProfile2D(("hTimeWideDepth"+int2string(it+1)).c_str(),("hTimeWideDepth"+int2string(it+1)).c_str(),59,-29.5,29.5,72,0.5,72.5, -37.5, 37.5,"s");   
+    hRatios[it]       = new TProfile2D(("hRatio_Depth"+int2string(it+1)).c_str(),("hRatio_Depth"+int2string(it+1)).c_str(),59,-29.5,29.5,72,0.5,72.5);
     hChOccupy[it]     = new TH2D(("hOccDepth"+int2string(it+1)).c_str(),("hOccDepth"+int2string(it+1)).c_str(),59,-29.5,29.5,72,0.5,72.5);
-    hRMS[it] = new TH2D(("hRMS_Depth"+int2string(it+1)).c_str(),("hRMS_Depth"+int2string(it+1)).c_str(),59,-29.5,29.5,72,0.5,72.5);
-    hRMSWide[it] = new TH2D(("hRMSWide_Depth"+int2string(it+1)).c_str(),("hRMSWide_Depth"+int2string(it+1)).c_str(),59,-29.5,29.5,72,0.5,72.5);
+    hRMS[it]          = new TH2D(("hRMS_Depth"+int2string(it+1)).c_str(),("hRMS_Depth"+int2string(it+1)).c_str(),59,-29.5,29.5,72,0.5,72.5);
+    hRMSWide[it]      = new TH2D(("hRMSWide_Depth"+int2string(it+1)).c_str(),("hRMSWide_Depth"+int2string(it+1)).c_str(),59,-29.5,29.5,72,0.5,72.5);
+    
+    hRMSHist[it] = new TH1D(("hRMS_Part"+int2string(it+1)).c_str(),("hRMS_Part"+int2string(it+1)).c_str(),50, 0, 25);
+    hTimeHist[it] = new TH1D(("hTime_Part"+int2string(it+1)).c_str(),("hTime_Part"+int2string(it+1)).c_str(),50, -10, 10);
+    
   }
-  
-  TProfile2D *depth1 = new TProfile2D("depth1","depth1",59,-29.5,29.5,72,0.5,72.5, -37.5, 37.5,"s");
-  TProfile2D *depth2 = new TProfile2D("depth2","depth2",59,-29.5,29.5,72,0.5,72.5, -37.5, 37.5,"s");
-  TProfile2D *depth3 = new TProfile2D("depth3","depth3",59,-29.5,29.5,72,0.5,72.5, -37.5, 37.5,"s");
   
   
   TH2D *occupancy1 = new TH2D("occupancy1","occupancy1",59,-29.5,29.5,72,0.5,72.5);
@@ -82,7 +86,7 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
   TH2D *avgenergy2 = new TH2D("avgenergy2","energy2",59,-29.5,29.5,72,0.5,72.5);
   TH2D *avgenergy3 = new TH2D("avgenergy3","energy3",59,-29.5,29.5,72,0.5,72.5);
   
-  TH1F *hTimeAll   = new TH1F("hTimeAll"  ,"hTimeAll"  ,50, -10, 10);
+  TH1F *hTimeAll   = new TH1F("hTimeAll"  ,"hTimeAll"  ,50, -15, 15);
   TH1F *hTimePart1 = new TH1F("hTimePart1","hTimePart1",50, -10, 10);
   TH1F *hTimePart2 = new TH1F("hTimePart2","hTimePart2",50, -10, 10);
   TH1F *hTimePart3 = new TH1F("hTimePart3","hTimePart3",50, -10, 10);
@@ -95,15 +99,16 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
   TH2D *hTimeFromMeanD2 = new TH2D("hTimeFromMeanD2","hTimeFromMeanD2",59,-29.5,29.5,72,0.5,72.5);
   TH2D *hTimeFromMeanD3 = new TH2D("hTimeFromMeanD3","hTimeFromMeanD3",59,-29.5,29.5,72,0.5,72.5);
   
+  TH1F *hAllRechitTimeHB = new TH1F("hAllRechitTimeHB","hAllRechitTimeHB", 60, -15.0, 15.0);
+  TH1F *hAllRechitTimeHE = new TH1F("hAllRechitTimeHE","hAllRechitTimeHE", 60, -15.0, 15.0);
+  
   
   for(int j = 0; j < 3; ++j){
     hChTiming[j]     = (TProfile2D*)_file1->Get(("timingMaps/hHBHETiming_Depth"+int2string(j+1)).c_str());
     hChTimingWide[j] = (TProfile2D*)_file1->Get(("timingMaps/hHBHETiming_wide_Depth"+int2string(j+1)).c_str());
+    hRatios[j]       = (TProfile2D*)_file1->Get(("timingMaps/hHBHETimingRat_Depth"+int2string(j+1)).c_str());
     hChOccupy[j]     = (TH2D*)_file1->Get(("timingMaps/occupancy_d"+int2string(j+1)).c_str());
   }
-  depth1 = (TProfile2D*)_file1->Get("timingMaps/hHBHETiming_Depth1");
-  depth2 = (TProfile2D*)_file1->Get("timingMaps/hHBHETiming_Depth2");
-  depth3 = (TProfile2D*)_file1->Get("timingMaps/hHBHETiming_Depth3");
   
   occupancy1 = (TH2D*)_file1->Get("timingMaps/occupancy_d1");
   occupancy2 = (TH2D*)_file1->Get("timingMaps/occupancy_d2");
@@ -111,7 +116,7 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
   
   TCanvas *c1 = new TCanvas("c1","c1",800,600);
   
-  for(int d = 0; d < 2; ++d){ // loop over all 3 depths
+  for(int d = 0; d < 3; ++d){ // loop over all 3 depths
     for(int y=1; y < hChTiming[d]->GetNbinsY()+1; ++y){ // loop through iphi
       for(int x=1; x < hChTiming[d]->GetNbinsX()+1; ++x){ // loop through ieta
         int ieta = (int)hChTiming[d]->GetXaxis()->GetBinCenter(x); // get ieta value corresponding to x
@@ -126,20 +131,31 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
         double time = hChTiming[d]->GetBinContent(x,y);
         double RMS  = hChTiming[d]->GetBinError(x,y);
         double RMS_wide = hChTimingWide[d]->GetBinError(x,y);//= hChTiming[d]_wide->GetBinError(x,y);
+        double time_wide = hChTimingWide[d]->GetBinContent(x,y);
         hRMS[d]->SetBinContent(x,y,RMS);
         hRMSWide[d]->SetBinContent(x,y,RMS_wide);
+        
         // print crap if the time is off from zero by a lot
         if(printChannels && time>5) std::cout << "  depth " << d+1 << ", ieta = " << ieta << ",  iphi = " << iphi << std::endl;
         if(time ==0) continue;
-        hRMS1->SetBinContent(x,y,RMS);
+//         hRMS1->SetBinContent(x,y,RMS);
         hTimeAll->Fill(time);
-        if(y >= 3  && y <  27) hTimePart1->Fill(time);
-        if(y >= 27 && y <  51) hTimePart2->Fill(time);
-        if((y <  3  || y >= 51) && !(y==54&&ieta>0&&ieta<17&&d+1==1)) hTimePart3->Fill(time);
+        if(y >= 3  && y <  27) {
+          hTimeHist[0]->Fill(time);
+          hRMSHist[0]->Fill(RMS);
+        }
+        if(y >= 27 && y <  51) {
+          hTimeHist[1]->Fill(time);
+          hRMSHist[1]->Fill(RMS);
+        }
+        if((y <  3  || y >= 51) /*&& !(y==54&&ieta>0&&ieta<17&&d+1==1)*/) {
+          hTimeHist[2]->Fill(time);
+          hRMSHist[2]->Fill(RMS);
+        }
         
         
         // print histograms for any odd channel timings
-        if(fabs(time) > 2.5 || (RMS_wide > 11 && !is25ns)) {
+        if(fabs(time_wide) > 2.5 || (RMS_wide>11)) {
           TH1F *holdTime = new TH1F(("Outlier_Depth"+int2string(d+1)+"_ieta"+int2string(ieta)+"_iphi"+int2string(iphi)).c_str(),("Outlier_Depth"+int2string(d+1)+"_ieta"+int2string(ieta)+"_iphi"+int2string(iphi)).c_str(),75,-37.5,37.5);
           std::cout << "looking for... " << ("timingMaps/Depth"+int2string(d+1)+"_ieta"+int2string(ieta)+"_iphi"+int2string(iphi)).c_str() << std::endl;
           holdTime = (TH1F*)_file1->Get(("timingMaps/Depth"+int2string(d+1)+"_ieta"+int2string(ieta)+"_iphi"+int2string(iphi)).c_str());
@@ -155,93 +171,10 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
   } // End loop over depths
   // fill the depth 2 rms map
   
-  double meanPart1 = 0;
-  double meanPart2 = 0;
-  double meanPart3 = 0;
   
-  
-  
-  for(int y=1; y < depth1->GetNbinsY()+1; ++y){
-    for(int x=1; x < depth1->GetNbinsX()+1; ++x){
-      if(depth1->GetXaxis()->GetBinCenter(x) == 0) continue;
-      if(fabs(depth1->GetXaxis()->GetBinCenter(x)) > 20 && ((int)depth1->GetYaxis()->GetBinCenter(y))%2==0) continue;
-      double time = depth1->GetBinContent(x,y);
-      if(y >= 3  && y <  27) hTimeFromMeanD1->SetBinContent(x,y,time-meanPart1);
-      if(y >= 27 && y <  51) hTimeFromMeanD1->SetBinContent(x,y,time-meanPart2);
-      if(y <  3  || y >= 51) hTimeFromMeanD1->SetBinContent(x,y,time-meanPart3);
-      
-      if(printChannels == true){
-        if(y >= 3  && y <  27) {std::cout << "depth 1, iphi " << depth1->GetYaxis()->GetBinCenter(y)
-          << ", ieta " << depth1->GetXaxis()->GetBinCenter(x) << ", time " << time << std::endl; 
-        }
-        if(y >= 27 && y <  51) {std::cout << "depth 1, iphi " << depth1->GetYaxis()->GetBinCenter(y)
-          << ", ieta " << depth1->GetXaxis()->GetBinCenter(x) << ", time " << time << std::endl;
-        }
-        if((y <  3  || y >= 51)) {std::cout << "depth 1, iphi " << depth1->GetYaxis()->GetBinCenter(y)
-          << ", ieta " << depth1->GetXaxis()->GetBinCenter(x) << ", time " << time << std::endl;
-        }
-      }
-      if(fabs(time-meanPart1) > 5.0 && y >= 3  && y <  27) ++nOutliers;
-      if(fabs(time-meanPart2) > 5.0 && y >= 27 && y <  51) ++nOutliers;
-      if(fabs(time-meanPart3) > 5.0 && (y < 3 || y >= 51)) ++nOutliers;
-    }
-  }
-  
-  for(int y=1; y < depth2->GetNbinsY()+1; ++y){
-//     std:: cout << "y " << y << "  phi " << depth2->GetYaxis()->GetBinCenter(y) << std::endl;
-    for(int x=1; x < depth2->GetNbinsX()+1; ++x){
-      if(fabs(depth2->GetXaxis()->GetBinCenter(x)) < 16 || fabs(depth2->GetXaxis()->GetBinCenter(x)) == 17) continue;
-      if(fabs(depth2->GetXaxis()->GetBinCenter(x)) > 20 && ((int)depth2->GetYaxis()->GetBinCenter(y))%2==0) continue;
-      double time = depth2->GetBinContent(x,y);
-      if(y >= 3  && y <  27) hTimeFromMeanD2->SetBinContent(x,y,time-meanPart1);
-      if(y >= 27 && y <  51) hTimeFromMeanD2->SetBinContent(x,y,time-meanPart2);
-      if(y <  3  || y >= 51) hTimeFromMeanD2->SetBinContent(x,y,time-meanPart3);
-      
-      if(printChannels == true){
-        if(/*fabs(time-meanPart1) > 1  && fabs(time-meanPart1) < 5.0  &&*/ y >= 3  && y <  27) {std::cout << "depth 2, iphi " << depth2->GetYaxis()->GetBinCenter(y)
-          << ", ieta " << depth2->GetXaxis()->GetBinCenter(x) << ", time " << time << std::endl;
-        }
-        if(/*fabs(time-meanPart2) > 1  && fabs(time-meanPart2) < 5.0  &&*/ y >= 27 && y <  51) {std::cout << "depth 2, iphi " << depth2->GetYaxis()->GetBinCenter(y)
-          << ", ieta " << depth2->GetXaxis()->GetBinCenter(x) << ", time " << time << std::endl;
-        }
-        if(/*fabs(time-meanPart3) > 1  && fabs(time-meanPart3) < 5.0  && */(y <  3  || y >= 51)) {std::cout << "depth 2, iphi " << depth2->GetYaxis()->GetBinCenter(y)
-          << ", ieta " << depth2->GetXaxis()->GetBinCenter(x) << ", time " << time << std::endl;
-        }
-      }
-      
-      if(fabs(time-meanPart1) > 5.0 && y >= 3  && y <  27) ++nOutliers;
-      if(fabs(time-meanPart2) > 5.0 && y >= 27 && y <  51) ++nOutliers;
-      if(fabs(time-meanPart3) > 5.0  && (y <  3  || y >= 51)) ++nOutliers;
-    }
-  }
-  
-  for(int y=1; y < depth3->GetNbinsY()+1; ++y){
-    for(int x=1; x < depth3->GetNbinsX()+1; ++x){
-      if(fabs(depth3->GetXaxis()->GetBinCenter(x)) < 16 ||( fabs(depth3->GetXaxis()->GetBinCenter(x)) > 16 && fabs(depth3->GetXaxis()->GetBinCenter(x)) < 27)) continue;
-      if(fabs(depth3->GetXaxis()->GetBinCenter(x)) >= 27 && ((int)depth3->GetYaxis()->GetBinCenter(y))%2==0) continue;
-      if(fabs(depth3->GetXaxis()->GetBinCenter(x)) > 28) continue;
-      double time = depth3->GetBinContent(x,y);
-      if(y >= 3  && y <  27) hTimeFromMeanD3->SetBinContent(x,y,time-meanPart1);
-      if(y >= 27 && y <  51) hTimeFromMeanD3->SetBinContent(x,y,time-meanPart2);
-      if(y <  3  || y >= 51) hTimeFromMeanD3->SetBinContent(x,y,time-meanPart3);
-      
-      if (printChannels == true){
-        if(/*fabs(time-meanPart1) > 1  && fabs(time-meanPart1) < 5.0*//* &&*/ y >= 3  && y <  27) {std::cout << "depth 3, iphi " << depth3->GetYaxis()->GetBinCenter(y) 
-          << ", ieta " << depth3->GetXaxis()->GetBinCenter(x) << ", time " << time << std::endl;
-        }
-        if(/*fabs(time-meanPart2) > 1  && fabs(time-meanPart2) < 5.0 && */y >= 27 && y <  51) {std::cout << "depth 3, iphi " << depth3->GetYaxis()->GetBinCenter(y) 
-          << ", ieta " << depth3->GetXaxis()->GetBinCenter(x) << ", time " << time << std::endl;
-        }
-        if(/*fabs(time-meanPart3) > 1  && fabs(time-meanPart3) < 5.0  && */(y <  3  || y >= 51)) {std::cout << "depth 3, iphi " << depth3->GetYaxis()->GetBinCenter(y) 
-          << ", ieta " << depth3->GetXaxis()->GetBinCenter(x) << ", time " << time << std::endl;
-        }
-      }
-      
-      if(fabs(time-meanPart1) > 5.0 && y >= 3  && y <  27) ++nOutliers;
-      if(fabs(time-meanPart2) > 5.0 && y >= 27 && y <  51) ++nOutliers;
-      if(fabs(time-meanPart3) > 5.0  && (y <  3  || y >= 51)) ++nOutliers;
-    }
-  }
+  // ================================================================================
+  // ~~~~~~~~~~~~          Print plots                           ~~~~~~~~~~~~~~~~~~~~
+  // --------------------------------------------------------------------------------
   
   TCanvas *canv = new TCanvas("canv","canv",800,600);
   canv->cd();
@@ -250,7 +183,7 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
   
   
   // print all depths
-  for(int depth = 0; depth < 2; ++depth){
+  for(int depth = 0; depth < 3; ++depth){
     
     hChOccupy[depth]->SetStats(kFALSE);
     hChOccupy[depth]->GetXaxis()->SetTitle("ieta");
@@ -265,9 +198,18 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
     hChTiming[depth]->GetXaxis()->SetTitle("ieta");
     hChTiming[depth]->GetYaxis()->SetTitle("iphi");
     hChTiming[depth]->GetZaxis()->SetRangeUser(-6.0, 6.0);
-    hChTiming[depth]->SetTitle(("HBHE Average Time, Depth "+int2string(depth+1)).c_str());
+    hChTiming[depth]->SetTitle(("HBHE Average Channel Timing, Depth "+int2string(depth+1) +" (Run 256677)").c_str());
     hChTiming[depth]->Draw("colz");
     canv->Print((outputDir+"/"+datasetInfo+"_Depth"+int2string(depth+1)+"_AverageTime.png").c_str());
+    canv->Clear();
+    
+    hRatios[depth]->SetStats(kFALSE);
+    hRatios[depth]->GetXaxis()->SetTitle("ieta");
+    hRatios[depth]->GetYaxis()->SetTitle("iphi");
+    hRatios[depth]->GetZaxis()->SetRangeUser(0.0, 2.0);
+    hRatios[depth]->SetTitle(("TS4/TS5 Ratio, Depth "+int2string(depth+1)).c_str());
+    hRatios[depth]->Draw("colz");
+    canv->Print((outputDir+"/"+datasetInfo+"_Depth"+int2string(depth+1)+"_TS45Ratio.png").c_str());
     canv->Clear();
     
     hChTimingWide[depth]->SetStats(kFALSE);
@@ -278,123 +220,58 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
     hChTimingWide[depth]->Draw("colz");
     canv->Print((outputDir+"/"+datasetInfo+"_Depth"+int2string(depth+1)+"_AverageTimeWideWindow.png").c_str());
     canv->Clear();
+    
+    
+    hRMS[depth]->SetStats(kFALSE);
+    hRMS[depth]->GetXaxis()->SetTitle("ieta");
+    hRMS[depth]->GetYaxis()->SetTitle("iphi");
+    hRMS[depth]->GetZaxis()->SetRangeUser(0.0, 25.0);
+    hRMS[depth]->SetTitle(("HBHE Time RMS, Depth "+int2string(depth+1)).c_str());
+    hRMS[depth]->Draw("colz");
+    canv->Print((outputDir+"/"+datasetInfo+"_Depth"+int2string(depth+1)+"_RMS.png").c_str());
+    canv->Clear();
+    
+    hRMSWide[depth]->SetStats(kFALSE);
+    hRMSWide[depth]->GetXaxis()->SetTitle("ieta");
+    hRMSWide[depth]->GetYaxis()->SetTitle("iphi");
+    hRMSWide[depth]->GetZaxis()->SetRangeUser(0.0, 25.0);
+    hRMSWide[depth]->SetTitle(("HBHE Time RMS (wide window), Depth "+int2string(depth+1)).c_str());
+    hRMSWide[depth]->Draw("colz");
+    canv->Print((outputDir+"/"+datasetInfo+"_Depth"+int2string(depth+1)+"_RMSWideWindow.png").c_str());
+    canv->Clear();
+    
+    hRMSHist[depth]->SetStats(kTRUE);
+    hRMSHist[depth]->GetXaxis()->SetTitle("RMS");
+    hRMSHist[depth]->GetYaxis()->SetTitle("Number of Channels");
+    hRMSHist[depth]->GetZaxis()->SetRangeUser(0.0, 25.0);
+    if(depth == 0) hRMSHist[depth]->SetTitle("Channels with iphi 3-26");
+    if(depth == 1) hRMSHist[depth]->SetTitle("Channels with iphi 27-50");
+    if(depth == 2) hRMSHist[depth]->SetTitle("Channels with iphi 51-72, 1-2");
+    hRMSHist[depth]->Draw("colz");
+    canv->Print((outputDir+"/"+datasetInfo+"_RMS_Partition"+int2string(depth+1)+".png").c_str());
+    canv->Clear();
+    
+    hTimeHist[depth]->SetStats(kTRUE);
+    hTimeHist[depth]->GetXaxis()->SetTitle("Average Time [ns]");
+    hTimeHist[depth]->GetYaxis()->SetTitle("Number of Channels");
+    hTimeHist[depth]->GetZaxis()->SetRangeUser(0.0, 25.0);
+    if(depth == 0) hTimeHist[depth]->SetTitle("Channels with iphi 3-26");
+    if(depth == 1) hTimeHist[depth]->SetTitle("Channels with iphi 27-50");
+    if(depth == 2) hTimeHist[depth]->SetTitle("Channels with iphi 51-72, 1-2");
+    hTimeHist[depth]->Draw();
+    canv->Print((outputDir+"/"+datasetInfo+"_AverageTime_Partition"+int2string(depth+1)+".png").c_str());
+    canv->Clear();
+    
   }
-  
-  
-  hRMS1->SetStats(kFALSE);
-  hRMS1->GetXaxis()->SetTitle("ieta");
-  hRMS1->GetYaxis()->SetTitle("iphi");
-  hRMS1->SetTitle("HBHE Timing RMS, Depth 1");
-  hRMS1->Draw("colz");
-  canv->Print((outputDir+"/"+datasetInfo+"_Depth1_timeRMS.png").c_str());
-  
-  hRMS2->SetStats(kFALSE);
-  hRMS2->GetXaxis()->SetTitle("ieta");
-  hRMS2->GetYaxis()->SetTitle("iphi");
-  hRMS2->SetTitle("HBHE Timing RMS, Depth 2");
-  hRMS2->Draw("colz");
-  canv->Print((outputDir+"/"+datasetInfo+"_Depth2_timeRMS.png").c_str());
-  
-  hRMS3->SetStats(kFALSE);
-  hRMS3->GetXaxis()->SetTitle("ieta");
-  hRMS3->GetYaxis()->SetTitle("iphi");
-  hRMS3->SetTitle("HBHE Timing RMS, Depth 3");
-  hRMS3->Draw("colz");
-  canv->Print((outputDir+"/"+datasetInfo+"_Depth3_timeRMS.png").c_str());
-  
-  depth1->SetStats(kFALSE);
-  depth1->GetXaxis()->SetTitle("ieta");
-  depth1->GetYaxis()->SetTitle("iphi");
-  depth1->GetZaxis()->SetRangeUser(-6.0, 6.0);
-  depth1->SetTitle("HBHE Average Time, Depth 1");
-  depth1->Draw("colz");
-  canv->Print((outputDir+"/"+datasetInfo+"_Depth1_timeProf.png").c_str());
-  
-  depth1->SetStats(kFALSE);
-  depth2->GetXaxis()->SetTitle("ieta");
-  depth2->GetYaxis()->SetTitle("iphi");
-  depth2->GetZaxis()->SetRangeUser(-6.0, 6.0);
-  depth2->SetTitle("HBHE Average Time, Depth 2");
-  depth2->Draw("colz");
-  canv->Print((outputDir+"/"+datasetInfo+"_Depth2_timeProf.png").c_str());
-  
-  depth1->SetStats(kFALSE);
-  depth3->GetXaxis()->SetTitle("ieta");
-  depth3->GetYaxis()->SetTitle("iphi");
-  depth3->GetZaxis()->SetRangeUser(-6.0, 6.0);
-  depth3->SetTitle("HBHE Average Time, Depth 3");
-  depth3->Draw("colz");
-  canv->Print((outputDir+"/"+datasetInfo+"_Depth3_timeProf.png").c_str());
-  
-  hTimeAll->SetStats(kTRUE);
+
+  canv->SetLogy(kTRUE);
+  hTimeAll->SetStats(kFALSE);
   hTimeAll->GetXaxis()->SetTitle("Average time per channel [ns]");
   hTimeAll->GetYaxis()->SetTitle("Number of channels");
-  hTimeAll->SetTitle("All Channels");
+  hTimeAll->SetTitle("Average Time of Individual HBHE Channels (Run 256677)");
   hTimeAll->Draw("colz");
-  canv->Print((outputDir+"/"+datasetInfo+"_Depth1_timeHist_All.png").c_str());
+  canv->Print((outputDir+"/"+datasetInfo+"_timeHist_All.png").c_str());
 
-  hTimePart1->SetStats(kTRUE);
-  hTimePart1->GetXaxis()->SetTitle("Average time per channel [ns]");
-  hTimePart1->GetYaxis()->SetTitle("Number of channels");
-  hTimePart1->SetTitle("Channels with iphi 3-26");
-  hTimePart1->Draw("");
-  canv->Print((outputDir+"/"+datasetInfo+"_Depth1_timeHist_Part1.png").c_str());
-  
-  hTimePart2->SetStats(kTRUE);
-  hTimePart2->GetXaxis()->SetTitle("Average time per channel [ns]");
-  hTimePart2->GetYaxis()->SetTitle("Number of channels");
-  hTimePart2->SetTitle("Channels with iphi 27-50");
-  hTimePart2->Draw("");
-  canv->Print((outputDir+"/"+datasetInfo+"_Depth1_timeHist_Part2.png").c_str());
-  
-  hTimePart3->SetStats(kTRUE);
-  hTimePart3->GetXaxis()->SetTitle("Average time per channel [ns]");
-  hTimePart3->GetYaxis()->SetTitle("Number of channels");
-  hTimePart3->SetTitle("Channels with iphi 51-72, 1-2");
-  hTimePart3->Draw("");
-  canv->Print((outputDir+"/"+datasetInfo+"_Depth1_timeHist_Part3.png").c_str());
-  
-  hRMSdepth1->SetStats(kTRUE);
-  hRMSdepth1->GetXaxis()->SetTitle("RMS per channel");
-  hRMSdepth1->GetYaxis()->SetTitle("Number of channels");
-  hRMSdepth1->SetTitle("RMS, Depth 1");
-  hRMSdepth1->Draw("");
-  canv->Print((outputDir+"/"+datasetInfo+"_Depth1_timeRMS_hist.png").c_str());
-  
-  hRMSdepth2->SetStats(kTRUE);
-  hRMSdepth2->GetXaxis()->SetTitle("RMS per channel");
-  hRMSdepth2->GetYaxis()->SetTitle("Number of channels");
-  hRMSdepth2->SetTitle("RMS, Depth 2");
-  hRMSdepth2->Draw("");
-  canv->Print((outputDir+"/"+datasetInfo+"_Depth2_timeRMS_hist.png").c_str());
-  
-  hRMSdepth3->SetStats(kTRUE);
-  hRMSdepth3->GetXaxis()->SetTitle("RMS per channel");
-  hRMSdepth3->GetYaxis()->SetTitle("Number of channels");
-  hRMSdepth3->SetTitle("RMS, Depth 3");
-  hRMSdepth3->Draw("");
-  canv->Print((outputDir+"/"+datasetInfo+"_Depth3_timeRMS_hist.png").c_str());
-  
-  hTimeFromMeanD1->SetStats(kFALSE);
-  hTimeFromMeanD1->GetXaxis()->SetTitle("ieta");
-  hTimeFromMeanD1->GetYaxis()->SetTitle("iphi");
-  hTimeFromMeanD1->SetTitle("timing offset from mean");
-  hTimeFromMeanD1->Draw("colz");
-  canv->Print((outputDir+"/"+datasetInfo+"_Depth1_timeOffset_hist.png").c_str());
-  
-  hTimeFromMeanD2->SetStats(kFALSE);
-  hTimeFromMeanD2->GetXaxis()->SetTitle("ieta");
-  hTimeFromMeanD2->GetYaxis()->SetTitle("iphi");
-  hTimeFromMeanD2->SetTitle("timing offset from mean");
-  hTimeFromMeanD2->Draw("colz");
-  canv->Print((outputDir+"/"+datasetInfo+"_Depth2_timeOffset_hist.png").c_str());
-  
-  hTimeFromMeanD3->SetStats(kFALSE);
-  hTimeFromMeanD3->GetXaxis()->SetTitle("ieta");
-  hTimeFromMeanD3->GetYaxis()->SetTitle("iphi");
-  hTimeFromMeanD3->SetTitle("timing offset from mean");
-  hTimeFromMeanD3->Draw("colz");
-  canv->Print((outputDir+"/"+datasetInfo+"_Depth3_timeOffset_hist.png").c_str());
   
   
   // done

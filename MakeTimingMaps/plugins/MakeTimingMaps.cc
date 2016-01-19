@@ -101,6 +101,10 @@ class MakeTimingMaps : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       TProfile2D *hHBHETiming_Depth2;
       TProfile2D *hHBHETiming_Depth3;
       
+      TProfile2D *hHBHETimingRat_Depth1;
+      TProfile2D *hHBHETimingRat_Depth2;
+      TProfile2D *hHBHETimingRat_Depth3;
+      
       TProfile2D *hHBHETiming_wide_Depth1;
       TProfile2D *hHBHETiming_wide_Depth2;
       TProfile2D *hHBHETiming_wide_Depth3;
@@ -122,6 +126,13 @@ class MakeTimingMaps : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       TH1F **hM2M0_HE_10_20 = new TH1F*[3];
       TH1F **hM2M0_HE_20 = new TH1F*[3];
       
+      TH1F **hGoodTimeADC = new TH1F*[10];
+      TH1F **hOffTimeADC = new TH1F*[10];
+      TH1F **hSingleChanADC = new TH1F*[10];
+      
+      TH1F **hGoodChanEnergy = new TH1F*[10];
+      TH1F **hBadChanEnergy = new TH1F*[10];
+      
       int runNumber_;
       
       TH1F *hPart1;
@@ -132,12 +143,19 @@ class MakeTimingMaps : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       TH2F *occupancy_d2;
       TH2F *occupancy_d3;
       
+      TH1F *hAllRechitTimeHB;
+      TH1F *hAllRechitTimeHE;
+      
       const double nBinsX =  100;
       const double nBinsY =  100;
       const double minValX =   0;
       const double maxValX = 100;
       const double minValY = -25;
       const double maxValY =  25;
+      
+      int nHistsGood =0;
+      int nHistsBad =0;
+      int nHistsSing = 0;
 
       // ----------member data ---------------------------
 };
@@ -168,7 +186,7 @@ MakeTimingMaps::MakeTimingMaps(const edm::ParameterSet& iConfig)
     hTiming_Depth3[i] = new TH1F*[72]; 
   }
   
-  sHBHERecHitCollection = iConfig.getUntrackedParameter<string>("HBHERecHits","hbhereco");
+  sHBHERecHitCollection = iConfig.getUntrackedParameter<string>("HBHERecHits","hbheprereco");
   runNumber_ = iConfig.getParameter<int>("runNumber");
    
   // Make the output tree
@@ -200,6 +218,15 @@ MakeTimingMaps::MakeTimingMaps(const edm::ParameterSet& iConfig)
     }
   }
   
+  for(int i = 0; i< 10; ++i){
+    hGoodTimeADC[i] = FileService->make<TH1F>(("hADCGoodTime_"+int2string(i+1)).c_str(),("hADCGoodTime_"+int2string(i+1)).c_str(),10,-100,150);
+    hOffTimeADC[i] = FileService->make<TH1F>(("hADCOffTime_"+int2string(i+1)).c_str(),("hADCOffTime_"+int2string(i+1)).c_str(),10,-100,150);
+    hSingleChanADC[i] = FileService->make<TH1F>(("hSingleChanADC_"+int2string(i+1)).c_str(),("hSingleChanADC_"+int2string(i+1)).c_str(),10,-100,150);
+    
+    hGoodChanEnergy[i] = FileService->make<TH1F>(("hGoodChanEnergy_"+int2string(i+1)).c_str(),("hGoodChanEnergy_"+int2string(i+1)).c_str(),10,-100,150);
+    hBadChanEnergy[i] = FileService->make<TH1F>(("hBadChanEnergy_"+int2string(i+1)).c_str(),("hBadChanEnergy_"+int2string(i+1)).c_str(),10,-100,150);
+  }
+  
   
   // run 251244
   hHBHETiming_wide_Depth1 = FileService->make<TProfile2D>("hHBHETiming_wide_Depth1","hHBHETiming_wide_Depth1",59,-29.5,29.5,72,0.5,72.5, -37.5, 37.5,"s");
@@ -210,11 +237,11 @@ MakeTimingMaps::MakeTimingMaps(const edm::ParameterSet& iConfig)
   hHBHETiming_Depth2 = FileService->make<TProfile2D>("hHBHETiming_Depth2","hHBHETiming_Depth2",59,-29.5,29.5,72,0.5,72.5, -12.5, 12.5,"s");
   hHBHETiming_Depth3 = FileService->make<TProfile2D>("hHBHETiming_Depth3","hHBHETiming_Depth3",59,-29.5,29.5,72,0.5,72.5, -12.5, 12.5,"s");
   
-  hHBHETiming_SmallStats = FileService->make<TProfile>("hHBHETiming_SmallStats","hHBHETiming_SmallStats",3,0.5,3.5, -37.5, 37.5,"s");
+  hHBHETimingRat_Depth1 = FileService->make<TProfile2D>("hHBHETimingRat_Depth1","hHBHETimingRat_Depth1",59,-29.5,29.5,72,0.5,72.5, -12.5, 12.5,"s");
+  hHBHETimingRat_Depth2 = FileService->make<TProfile2D>("hHBHETimingRat_Depth2","hHBHETimingRat_Depth2",59,-29.5,29.5,72,0.5,72.5, -12.5, 12.5,"s");
+  hHBHETimingRat_Depth3 = FileService->make<TProfile2D>("hHBHETimingRat_Depth3","hHBHETimingRat_Depth3",59,-29.5,29.5,72,0.5,72.5, -12.5, 12.5,"s");
   
-//   hHBHEEnergy_Depth1 = FileService->make<TProfile2D>("hHBHEEnergy_Depth1","hHBHEEnergy_Depth1",59,-29.5,29.5,72,0.5,72.5, 5, 1000);
-//   hHBHEEnergy_Depth2 = FileService->make<TProfile2D>("hHBHEEnergy_Depth2","hHBHEEnergy_Depth2",59,-29.5,29.5,72,0.5,72.5, 5, 1000);
-//   hHBHEEnergy_Depth3 = FileService->make<TProfile2D>("hHBHEEnergy_Depth3","hHBHEEnergy_Depth3",59,-29.5,29.5,72,0.5,72.5, 5, 1000);
+  hHBHETiming_SmallStats = FileService->make<TProfile>("hHBHETiming_SmallStats","hHBHETiming_SmallStats",3,0.5,3.5, -37.5, 37.5,"s");
   
   hHBHEEnergy_Depth1 = FileService->make<TH2F>("hHBHEEnergy_Depth1","hHBHEEnergy_Depth1",59,-29.5,29.5,72,0.5,72.5);
   hHBHEEnergy_Depth2 = FileService->make<TH2F>("hHBHEEnergy_Depth2","hHBHEEnergy_Depth2",59,-29.5,29.5,72,0.5,72.5);
@@ -228,6 +255,8 @@ MakeTimingMaps::MakeTimingMaps(const edm::ParameterSet& iConfig)
   hPart2 = FileService->make<TH1F>("hPart2","average avg time partition 2", 25, -12.5, 12.5);
   hPart3 = FileService->make<TH1F>("hPart3","average avg time partition 3", 25, -12.5, 12.5);
   
+  hAllRechitTimeHB = FileService->make<TH1F>("hAllRechitTimeHB","hAllRechitTimeHB", 60, -15.0, 15.0);
+  hAllRechitTimeHE = FileService->make<TH1F>("hAllRechitTimeHE","hAllRechitTimeHE", 60, -15.0, 15.0);
   
   for(int i = 0; i < 3; i++){
     hM2M0_HB_5_10[i]  = FileService->make<TH1F>(("hM2M0_HB_5_10_p"+int2string(i+1)).c_str(),  ("M2/M0, HB part"+int2string(i+1)+" 5-10GeV").c_str(),  50, 0.0, 2.0);
@@ -287,7 +316,9 @@ MakeTimingMaps::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     ClearVariables();
     RunNumber = iEvent.id().run();
     EvtNumber = iEvent.id().event();
+//     std::cout << EvtNumber << std::endl;
     if(RunNumber != runNumber_ /*&& RunNumber!=251244 && RunNumber!=251252 && RunNumber!=251562 && RunNumber!=251561 && RunNumber!=251643*/) continue;
+//     if(EvtNumber!=1209440761&&EvtNumber!=1645183324&&EvtNumber!=1646392152&&EvtNumber!=342259059&&EvtNumber!=752726526&&EvtNumber!=626136425&&EvtNumber!=1907093580&&EvtNumber!=478641879&&EvtNumber!=489395114&&EvtNumber!=420416571&&EvtNumber!=453077625&&EvtNumber!=156112502&&EvtNumber!=211728729&&EvtNumber!=282325790&&EvtNumber!=349577246&&EvtNumber!=268455303&&EvtNumber!=199531636&&EvtNumber!=478641879&&EvtNumber!=489395114) continue;//quit if we aren't on a pre-firing event 
     
     HcalDetId detID_rh = (*hRecHits)[i].id().rawId();
     depth = (*hRecHits)[i].id().depth();
@@ -296,6 +327,23 @@ MakeTimingMaps::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     RecHitTime = (*hRecHits)[i].time();
     iEta = detID_rh.ieta();
     iPhi = detID_rh.iphi();
+    
+    int adc[8];
+    
+    int auxwd1 = (*hRecHits)[i].auxHBHE();  // TS = 0,1,2,3 info
+    int auxwd2 = (*hRecHits)[i].aux();      // TS = 4,5,6,7 info
+    
+    adc[0] = (auxwd1)       & 0x7F;
+    adc[1] = (auxwd1 >> 7)  & 0x7F;
+    adc[2] = (auxwd1 >> 14) & 0x7F;
+    adc[3] = (auxwd1 >> 21) & 0x7F;
+
+    adc[4] = (auxwd2)       & 0x7F;
+    adc[5] = (auxwd2 >> 7)  & 0x7F;
+    adc[6] = (auxwd2 >> 14) & 0x7F;
+    adc[7] = (auxwd2 >> 21) & 0x7F;
+    
+    //for(int k=0; k < 8; k++) std::cout << adc[k] << std::endl;
    
     if(RecHitEnergy> 1.0){
       if(detID_rh.iphi()>=3 && detID_rh.iphi() < 27){
@@ -346,30 +394,67 @@ MakeTimingMaps::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
     }
     
+    if(adc[4]>15&&adc[5]>0){
+      if(depth==1) hHBHETimingRat_Depth1->Fill(detID_rh.ieta(), detID_rh.iphi(), adc[4]/adc[5]);
+      if(depth==2) hHBHETimingRat_Depth2->Fill(detID_rh.ieta(), detID_rh.iphi(), adc[4]/adc[5]);
+      if(depth==3) hHBHETimingRat_Depth3->Fill(detID_rh.ieta(), detID_rh.iphi(), adc[4]/adc[5]);
+    }
     
+    
+    
+    if(RecHitEnergy > 0.8){
+      if(depth==1)hHBHEEnergy_Depth1->Fill(detID_rh.ieta(), detID_rh.iphi(),1);
+      if(depth==2)hHBHEEnergy_Depth2->Fill(detID_rh.ieta(), detID_rh.iphi(),1);
+      if(depth==3)hHBHEEnergy_Depth3->Fill(detID_rh.ieta(), detID_rh.iphi(),1);
+    }
     
     if(RecHitEnergy > 5.0) {
-//       std::cout << "ieta = " << detID_rh.ieta() << " and index = " << detID_rh.ieta()+29 << std::endl;
-//       std::cout << "iphi = " << detID_rh.iphi() << " and index = " << detID_rh.iphi()-1 << std::endl;
+      
+      if(fabs(detID_rh.ieta()) < 15) hAllRechitTimeHB->Fill(RecHitTime);
+      if(fabs(detID_rh.ieta()) > 16) hAllRechitTimeHE->Fill(RecHitTime);
       
       if(depth==1){
+        if(RecHitTime < -8&& nHistsSing < 10){
+          for(int nadc = 0; nadc < 8; nadc++){
+            hSingleChanADC[nHistsSing]->SetBinContent(nadc+1,adc[nadc]);
+            hSingleChanADC[nHistsSing]->SetTitle(("test channel, energy = "+int2string((int)RecHitEnergy)+" [GeV], time = "+int2string((int)RecHitTime)+" [ns], ieta = "+int2string(detID_rh.ieta())+", iphi = "+int2string(detID_rh.iphi())).c_str());
+          }
+          ++nHistsSing;
+        }
+          if(RecHitTime < -5 && RecHitTime > -20 && RecHitEnergy > 100 && nHistsBad < 10){
+            for(int nadc = 0; nadc < 8; nadc++){
+              hOffTimeADC[nHistsBad]->SetBinContent(nadc+1,adc[nadc]);
+              hOffTimeADC[nHistsBad]->SetTitle(("OOT Hit, energy = "+int2string((int)RecHitEnergy)+" [GeV], time = "+int2string((int)RecHitTime)+" [ns], ieta = "+int2string(detID_rh.ieta())+", iphi = "+int2string(detID_rh.iphi())).c_str());
+            }
+            ++nHistsBad;
+          }
+         else if(RecHitEnergy > 100 && fabs(RecHitTime) < 4 && nHistsGood < 10){
+          for(int nadc = 0; nadc < 8; nadc++){
+            hGoodTimeADC[nHistsGood]->SetBinContent(nadc+1,adc[nadc]);
+            hGoodTimeADC[nHistsGood]->SetTitle(("In-Time Hit, energy = "+int2string((int)RecHitEnergy)+" [GeV], time = "+int2string((int)RecHitTime)+" [ns], ieta = "+int2string(detID_rh.ieta())+", iphi = "+int2string(detID_rh.iphi())).c_str());
+          }
+          ++nHistsGood;
+          
+        }
+        
         hHBHETiming_Depth1->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitTime);
+//         hHBHETimingRat_Depth1->Fill(detID_rh.ieta(), detID_rh.iphi(), adc[4]/adc[5]);
         if(RecHitEnergy > 10.0) hHBHETiming_wide_Depth1->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitTime);
-        hHBHEEnergy_Depth1->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitEnergy);
+//         hHBHEEnergy_Depth1->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitEnergy);
         occupancy_d1->Fill(detID_rh.ieta(), detID_rh.iphi(),1);
         hTiming_Depth1[detID_rh.ieta()+29][detID_rh.iphi()-1]->Fill(RecHitTime);
       }
       if(depth==2){
         hHBHETiming_Depth2->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitTime);
         if(RecHitEnergy > 10.0) hHBHETiming_wide_Depth2->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitTime);
-        hHBHEEnergy_Depth2->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitEnergy);
+//         hHBHEEnergy_Depth2->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitEnergy);
         occupancy_d2->Fill(detID_rh.ieta(), detID_rh.iphi(),1);
         hTiming_Depth2[detID_rh.ieta()+29][detID_rh.iphi()-1]->Fill(RecHitTime);
       }
       if(depth==3){
         hHBHETiming_Depth3->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitTime);
         if(RecHitEnergy > 10.0) hHBHETiming_wide_Depth3->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitTime);
-        hHBHEEnergy_Depth3->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitEnergy);
+//         hHBHEEnergy_Depth3->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitEnergy);
         occupancy_d3->Fill(detID_rh.ieta(), detID_rh.iphi(),1);
         
         int bin = 0;
