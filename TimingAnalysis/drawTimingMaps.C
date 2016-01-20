@@ -38,54 +38,35 @@ string int2string(int i) {
 }
 
 
-void drawTimingMaps(std::string inputfile, std::string outputDir, std::string datasetInfo, bool printChannels, bool is25ns){
+void drawTimingMaps(std::string inputfile, std::string outputDir, std::string datasetInfo){
   
-  int nOutliers = 0;
+  // Read the specified input file
   TFile *_file1 = new TFile(inputfile.c_str());
+  // Take care of making the output diretory (if it doesn't already exist)
   gSystem->mkdir((outputDir).c_str(),true);
   gSystem->mkdir((outputDir+"/OutlierTimingPlot").c_str(),true);
   
+  // create some TProfile and 2-d plots
   TProfile2D **hChTiming     = new TProfile2D*[3];
-  TProfile2D **hChTimingWide = new TProfile2D*[3];
   TProfile2D **hRatios       = new TProfile2D*[3];
   
   TH2D       **hChOccupy     = new TH2D*[3];
   TH2D       **hRMS          = new TH2D*[3];
-  TH2D       **hRMSWide      = new TH2D*[3];
   TH1D       **hRMSHist      = new TH1D*[3];
   TH1D       **hTimeHist     = new TH1D*[3];
   
   // make a loop to book the histograms
   for(int it = 0; it < 3; ++it){
     hChTiming[it]     = new TProfile2D(("hTimeDepth"+int2string(it+1)).c_str(),("hTimeDepth"+int2string(it+1)).c_str(),59,-29.5,29.5,72,0.5,72.5, -37.5, 37.5,"s");
-    hChTimingWide[it] = new TProfile2D(("hTimeWideDepth"+int2string(it+1)).c_str(),("hTimeWideDepth"+int2string(it+1)).c_str(),59,-29.5,29.5,72,0.5,72.5, -37.5, 37.5,"s");   
-    hRatios[it]       = new TProfile2D(("hRatio_Depth"+int2string(it+1)).c_str(),("hRatio_Depth"+int2string(it+1)).c_str(),59,-29.5,29.5,72,0.5,72.5);
     hChOccupy[it]     = new TH2D(("hOccDepth"+int2string(it+1)).c_str(),("hOccDepth"+int2string(it+1)).c_str(),59,-29.5,29.5,72,0.5,72.5);
     hRMS[it]          = new TH2D(("hRMS_Depth"+int2string(it+1)).c_str(),("hRMS_Depth"+int2string(it+1)).c_str(),59,-29.5,29.5,72,0.5,72.5);
-    hRMSWide[it]      = new TH2D(("hRMSWide_Depth"+int2string(it+1)).c_str(),("hRMSWide_Depth"+int2string(it+1)).c_str(),59,-29.5,29.5,72,0.5,72.5);
     
     hRMSHist[it] = new TH1D(("hRMS_Part"+int2string(it+1)).c_str(),("hRMS_Part"+int2string(it+1)).c_str(),50, 0, 25);
     hTimeHist[it] = new TH1D(("hTime_Part"+int2string(it+1)).c_str(),("hTime_Part"+int2string(it+1)).c_str(),50, -10, 10);
-    
   }
   
   
-  TH2D *occupancy1 = new TH2D("occupancy1","occupancy1",59,-29.5,29.5,72,0.5,72.5);
-  TH2D *occupancy2 = new TH2D("occupancy2","occupancy2",59,-29.5,29.5,72,0.5,72.5);
-  TH2D *occupancy3 = new TH2D("occupancy3","occupancy3",59,-29.5,29.5,72,0.5,72.5);
-  
-  TH2D *hRMS1 = new TH2D("hRMS1","hRMS1",59,-29.5,29.5,72,0.5,72.5);
-  TH2D *hRMS2 = new TH2D("hRMS2","hRMS2",59,-29.5,29.5,72,0.5,72.5);
-  TH2D *hRMS3 = new TH2D("hRMS3","hRMS3",59,-29.5,29.5,72,0.5,72.5);
-   
-  TH2D *energy1 = new TH2D("energy1","energy1",59,-29.5,29.5,72,0.5,72.5);
-  TH2D *energy2 = new TH2D("energy2","energy2",59,-29.5,29.5,72,0.5,72.5);
-  TH2D *energy3 = new TH2D("energy3","energy3",59,-29.5,29.5,72,0.5,72.5);
-  
-  TH2D *avgenergy1 = new TH2D("avgenergy1","avgenergy1",59,-29.5,29.5,72,0.5,72.5);
-  TH2D *avgenergy2 = new TH2D("avgenergy2","energy2",59,-29.5,29.5,72,0.5,72.5);
-  TH2D *avgenergy3 = new TH2D("avgenergy3","energy3",59,-29.5,29.5,72,0.5,72.5);
-  
+  // make a bunch of histograms
   TH1F *hTimeAll   = new TH1F("hTimeAll"  ,"hTimeAll"  ,50, -15, 15);
   TH1F *hTimePart1 = new TH1F("hTimePart1","hTimePart1",50, -10, 10);
   TH1F *hTimePart2 = new TH1F("hTimePart2","hTimePart2",50, -10, 10);
@@ -103,16 +84,11 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
   TH1F *hAllRechitTimeHE = new TH1F("hAllRechitTimeHE","hAllRechitTimeHE", 60, -15.0, 15.0);
   
   
+  // get the plots from the root file
   for(int j = 0; j < 3; ++j){
     hChTiming[j]     = (TProfile2D*)_file1->Get(("timingMaps/hHBHETiming_Depth"+int2string(j+1)).c_str());
-    hChTimingWide[j] = (TProfile2D*)_file1->Get(("timingMaps/hHBHETiming_wide_Depth"+int2string(j+1)).c_str());
-    hRatios[j]       = (TProfile2D*)_file1->Get(("timingMaps/hHBHETimingRat_Depth"+int2string(j+1)).c_str());
     hChOccupy[j]     = (TH2D*)_file1->Get(("timingMaps/occupancy_d"+int2string(j+1)).c_str());
   }
-  
-  occupancy1 = (TH2D*)_file1->Get("timingMaps/occupancy_d1");
-  occupancy2 = (TH2D*)_file1->Get("timingMaps/occupancy_d2");
-  occupancy3 = (TH2D*)_file1->Get("timingMaps/occupancy_d3");
   
   TCanvas *c1 = new TCanvas("c1","c1",800,600);
   
@@ -130,16 +106,12 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
         // get the time, rms, etc per channel
         double time = hChTiming[d]->GetBinContent(x,y);
         double RMS  = hChTiming[d]->GetBinError(x,y);
-        double RMS_wide = hChTimingWide[d]->GetBinError(x,y);//= hChTiming[d]_wide->GetBinError(x,y);
-        double time_wide = hChTimingWide[d]->GetBinContent(x,y);
         hRMS[d]->SetBinContent(x,y,RMS);
-        hRMSWide[d]->SetBinContent(x,y,RMS_wide);
         
-        // print crap if the time is off from zero by a lot
-        if(printChannels && time>5) std::cout << "  depth " << d+1 << ", ieta = " << ieta << ",  iphi = " << iphi << std::endl;
         if(time ==0) continue;
-//         hRMS1->SetBinContent(x,y,RMS);
         hTimeAll->Fill(time);
+        
+        // fill by partitions
         if(y >= 3  && y <  27) {
           hTimeHist[0]->Fill(time);
           hRMSHist[0]->Fill(RMS);
@@ -148,23 +120,22 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
           hTimeHist[1]->Fill(time);
           hRMSHist[1]->Fill(RMS);
         }
-        if((y <  3  || y >= 51) /*&& !(y==54&&ieta>0&&ieta<17&&d+1==1)*/) {
+        if((y <  3  || y >= 51) ) {
           hTimeHist[2]->Fill(time);
           hRMSHist[2]->Fill(RMS);
         }
         
         
-        // print histograms for any odd channel timings
-        if(fabs(time_wide) > 2.5 || (RMS_wide>11)) {
-          TH1F *holdTime = new TH1F(("Outlier_Depth"+int2string(d+1)+"_ieta"+int2string(ieta)+"_iphi"+int2string(iphi)).c_str(),("Outlier_Depth"+int2string(d+1)+"_ieta"+int2string(ieta)+"_iphi"+int2string(iphi)).c_str(),75,-37.5,37.5);
-          std::cout << "looking for... " << ("timingMaps/Depth"+int2string(d+1)+"_ieta"+int2string(ieta)+"_iphi"+int2string(iphi)).c_str() << std::endl;
-          holdTime = (TH1F*)_file1->Get(("timingMaps/Depth"+int2string(d+1)+"_ieta"+int2string(ieta)+"_iphi"+int2string(iphi)).c_str());
+//         print histograms for any channels which seem to be big outliers
+        if(fabs(time) > 8.0 || (RMS>11)) {
+          TH1F *hTemp = new TH1F(("OT_D"+int2string(d+1)+"_ieta"+int2string(ieta)+"_iphi"+int2string(iphi)).c_str(),("OT_D"+int2string(d+1)+"_ieta"+int2string(ieta)+"_iphi"+int2string(iphi)).c_str(),75,-37.5,37.5);
+          hTemp = (TH1F*)_file1->Get(("timingMaps/Depth"+int2string(d+1)+"_ieta"+int2string(ieta)+"_iphi"+int2string(iphi)).c_str());
           c1->cd();
-          holdTime->SetTitle((datasetInfo+"_Depth"+int2string(d+1)+"_ieta"+int2string(ieta)+"_iphi"+int2string(iphi)).c_str());
-          holdTime->Draw();
+          hTemp->SetTitle((datasetInfo+" Depth="+int2string(d+1)+" ieta="+int2string(ieta)+" iphi="+int2string(iphi)).c_str());
+          hTemp->Draw();
           c1->Print((outputDir+"/"+"OutlierTimingPlot"+"/Outlier_"+datasetInfo+"_Depth"+int2string(d+1)+"_ieta"+int2string(ieta)+"_iphi"+int2string(iphi)+".png").c_str());
           c1->Clear();
-          delete holdTime;
+          delete hTemp;
         }
       } // End loop through ieta
     } // End loop through iphi
@@ -179,10 +150,10 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
   TCanvas *canv = new TCanvas("canv","canv",800,600);
   canv->cd();
   
-  if(printChannels) std::cout << "Number of channels where time from 0 is > 5ns" << nOutliers << std::endl;
-  
-  
-  // print all depths
+  // Loop over all three depths
+  // one plot of each quantity per HBHE depth
+  // here we just set up the axis labels, histogram title, and stuff like that
+  // also print the histograms to .png file
   for(int depth = 0; depth < 3; ++depth){
     
     hChOccupy[depth]->SetStats(kFALSE);
@@ -201,26 +172,7 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
     hChTiming[depth]->SetTitle(("HBHE Average Channel Timing, Depth "+int2string(depth+1) +" (Run 256677)").c_str());
     hChTiming[depth]->Draw("colz");
     canv->Print((outputDir+"/"+datasetInfo+"_Depth"+int2string(depth+1)+"_AverageTime.png").c_str());
-    canv->Clear();
-    
-    hRatios[depth]->SetStats(kFALSE);
-    hRatios[depth]->GetXaxis()->SetTitle("ieta");
-    hRatios[depth]->GetYaxis()->SetTitle("iphi");
-    hRatios[depth]->GetZaxis()->SetRangeUser(0.0, 2.0);
-    hRatios[depth]->SetTitle(("TS4/TS5 Ratio, Depth "+int2string(depth+1)).c_str());
-    hRatios[depth]->Draw("colz");
-    canv->Print((outputDir+"/"+datasetInfo+"_Depth"+int2string(depth+1)+"_TS45Ratio.png").c_str());
-    canv->Clear();
-    
-    hChTimingWide[depth]->SetStats(kFALSE);
-    hChTimingWide[depth]->GetXaxis()->SetTitle("ieta");
-    hChTimingWide[depth]->GetYaxis()->SetTitle("iphi");
-    hChTimingWide[depth]->GetZaxis()->SetRangeUser(-6.0, 6.0);
-    hChTimingWide[depth]->SetTitle(("HBHE Average Time (wide window), Depth "+int2string(depth+1)).c_str());
-    hChTimingWide[depth]->Draw("colz");
-    canv->Print((outputDir+"/"+datasetInfo+"_Depth"+int2string(depth+1)+"_AverageTimeWideWindow.png").c_str());
-    canv->Clear();
-    
+    canv->Clear();    
     
     hRMS[depth]->SetStats(kFALSE);
     hRMS[depth]->GetXaxis()->SetTitle("ieta");
@@ -229,15 +181,6 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
     hRMS[depth]->SetTitle(("HBHE Time RMS, Depth "+int2string(depth+1)).c_str());
     hRMS[depth]->Draw("colz");
     canv->Print((outputDir+"/"+datasetInfo+"_Depth"+int2string(depth+1)+"_RMS.png").c_str());
-    canv->Clear();
-    
-    hRMSWide[depth]->SetStats(kFALSE);
-    hRMSWide[depth]->GetXaxis()->SetTitle("ieta");
-    hRMSWide[depth]->GetYaxis()->SetTitle("iphi");
-    hRMSWide[depth]->GetZaxis()->SetRangeUser(0.0, 25.0);
-    hRMSWide[depth]->SetTitle(("HBHE Time RMS (wide window), Depth "+int2string(depth+1)).c_str());
-    hRMSWide[depth]->Draw("colz");
-    canv->Print((outputDir+"/"+datasetInfo+"_Depth"+int2string(depth+1)+"_RMSWideWindow.png").c_str());
     canv->Clear();
     
     hRMSHist[depth]->SetStats(kTRUE);
@@ -272,8 +215,6 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
   hTimeAll->Draw("colz");
   canv->Print((outputDir+"/"+datasetInfo+"_timeHist_All.png").c_str());
 
-  
-  
   // done
   return;
 }
