@@ -6,7 +6,7 @@
 # INPUTDIR=/afs/cern.ch/user/s/sabrandt/work/public/For_Miao/HcalTiming/CMSSW_7_6_3/src/
 INPUTDIR=../..
 
-# function inputs: drawPlots(inputFileName, outputFolderName, datasetDescriptionForPlots, getTextOutput of timing)
+# function inputs: drawPlots(inputFileName, outputFolderName, datasetDescriptionForPlots)
 root -l -q drawTimingMaps.C+\(\"${INPUTDIR}/run251721.root\",\"run251721\",\"run251721\"\)
 
 rm *.so *.d *.pcm
