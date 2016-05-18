@@ -240,9 +240,9 @@ MakeTimingMaps::MakeTimingMaps(const edm::ParameterSet& iConfig)
   hCorrTiming66to67P= FileService->make<TH2F>("hCorrTiming66to67P","hCorrTiming66to67P",100,-25,75,100,-25,75);
   hCorrTimingPhi67Plus= FileService->make<TH2F>("hCorrTimingPhi67Plus","hCorrTimingPhi67Plus",100,-25,75,100,-25,75);
   
-  hCheckEnergyIT= FileService->make<TH1F>("hCheckEnergyIT","hCheckEnergyIT",100,0,100);
-  hCheckEnergyOOT1= FileService->make<TH1F>("hCheckEnergyOOT1","hCheckEnergyOOT1",100,0,100);
-  hCheckEnergyOOT2= FileService->make<TH1F>("hCheckEnergyOOT2","hCheckEnergyOOT2",100,0,100);
+  hCheckEnergyIT= FileService->make<TH1F>("hCheckEnergyIT","hCheckEnergyIT",200,0,1000);
+  hCheckEnergyOOT1= FileService->make<TH1F>("hCheckEnergyOOT1","hCheckEnergyOOT1",200,0,1000);
+  hCheckEnergyOOT2= FileService->make<TH1F>("hCheckEnergyOOT2","hCheckEnergyOOT2",200,0,1000);
 }
 
 
@@ -293,7 +293,7 @@ MakeTimingMaps::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   for(int i = 0; i < (int)hRecHits->size(); i++) {
     ClearVariables(); // sets a bunch of stuff to zero
     
-    if(iEvent.bunchCrossing()!=1 && iEvent.bunchCrossing()!=1786) continue;
+//     if(iEvent.bunchCrossing()!=1 && iEvent.bunchCrossing()!=1786) continue;
     
     RunNumber = iEvent.id().run(); // get the run number for the event
     EvtNumber = iEvent.id().event(); // get the event number

@@ -45,20 +45,20 @@ process.source = cms.Source("PoolSource",
      #"root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run268958wNF_6.root",    
      
      # 2016B HLTPhysics* datasets
-     "root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272760HLT0.root",
-     "root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272760HLT1.root",
-     "root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272760HLT2.root",
-     "root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272760HLT3.root",
-     "root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272761HLT0.root",
-     "root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272761HLT1.root",
-     "root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272761HLT2.root",
-     "root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272761HLT3.root",
-     "root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272762HLT0.root",
-     "root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272762HLT1.root",
-     "root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272762HLT2.root",
-     "root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272762HLT3.root",
+     #"root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272760HLT0.root",
+     #"root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272760HLT1.root",
+     #"root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272760HLT2.root",
+     #"root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272760HLT3.root",
+     #"root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272761HLT0.root",
+     #"root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272761HLT1.root",
+     #"root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272761HLT2.root",
+     #"root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272761HLT3.root",
+     #"root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272762HLT0.root",
+     #"root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272762HLT1.root",
+     #"root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272762HLT2.root",
+     #"root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run272762HLT3.root",
      
-     #"root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/test2012ZB_test.root",
+     "root://eoscms.cern.ch//store/user/sabrandt/HCAL_Timing_Study/run198588zb.root",
      
      
     #run254532_SinglePulse.root"
@@ -66,12 +66,12 @@ process.source = cms.Source("PoolSource",
 )
 
 process.timingMaps = cms.EDAnalyzer('MakeTimingMaps')
-process.timingMaps.runNumber = cms.int32(198588)
+process.timingMaps.runNumber = cms.int32(272762)
 process.timingMaps.rechitEnergy = cms.double(5.0)
 process.timingMaps.timeLowBound = cms.double(-37.5)
 process.timingMaps.timeHighBound = cms.double(37.5)
 
-process.TFileService = cms.Service('TFileService', fileName = cms.string('run2016HLTvWideT.root') )
+process.TFileService = cms.Service('TFileService', fileName = cms.string('run198588zb.root') )
 
 
 process.p = cms.Path(process.timingMaps)
