@@ -65,6 +65,22 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
   TH2F *hCorrTimingPhi67Plus = new TH2F("hCorrTimingPhi67Plus","hCorrTimingPhi67Plus",100,-25,75,100,-25,75);
   hCorrTimingPhi67Plus = (TH2F*)_file1->Get("timingMaps/hCorrTimingPhi67Plus");
   
+  TH1F *hEnergyIT = new TH1F("hEnergyIT","hEnergyIT",500,0,1000);
+  TH1F *hEnergyOOT1 = new TH1F("hEnergyOOT1","hEnergyOOT1",500,0,1000);
+  TH1F *hEnergyOOT2 = new TH1F("hEnergyOOT2","hEnergyOOT2",500,0,1000);
+  
+  hEnergyIT = (TH1F*)_file1->Get("timingMaps/hCheckEnergyIT");
+  hEnergyOOT1 = (TH1F*)_file1->Get("timingMaps/hCheckEnergyOOT1");
+  hEnergyOOT2 = (TH1F*)_file1->Get("timingMaps/hCheckEnergyOOT2");
+  
+  TH1F *hEnergyITip51 = new TH1F("hEnergyITip51","hEnergyITip51",250,0,500);
+  TH1F *hEnergyOOT1ip51 = new TH1F("hEnergyOOT1ip51","hEnergyOOT1ip51",250,0,500);
+  TH1F *hEnergyOOT2ip51 = new TH1F("hEnergyOOT2ip51","hEnergyOOT2ip51",250,0,500);
+  
+  hEnergyITip51 = (TH1F*)_file1->Get("timingMaps/hCheckEnergyITip51");
+  hEnergyOOT1ip51 = (TH1F*)_file1->Get("timingMaps/hCheckEnergyOOT1ip51");
+  hEnergyOOT2ip51 = (TH1F*)_file1->Get("timingMaps/hCheckEnergyOOT2ip51");
+  
   // make a loop to book the histograms
   for(int it = 0; it < 3; ++it){
     hChTiming[it]     = new TProfile2D(("hTimeDepth"+int2string(it+1)).c_str(),("hTimeDepth"+int2string(it+1)).c_str(),59,-29.5,29.5,72,0.5,72.5, -37.5, 37.5,"s");
@@ -215,7 +231,7 @@ void drawTimingMaps(std::string inputfile, std::string outputDir, std::string da
     hRMS[depth]->SetStats(kFALSE);
     hRMS[depth]->GetXaxis()->SetTitle("ieta");
     hRMS[depth]->GetYaxis()->SetTitle("iphi");
-    hRMS[depth]->GetZaxis()->SetRangeUser(0.0, 12.0);
+    hRMS[depth]->GetZaxis()->SetRangeUser(0.0, 7.0);
     hRMS[depth]->SetTitle(("HBHE Time RMS, Depth "+int2string(depth+1)).c_str());
     hRMS[depth]->Draw("colz");
     canv->Print((outputDir+"/"+datasetInfo+"_Depth"+int2string(depth+1)+"_RMS.png").c_str());
