@@ -1,0 +1,6 @@
+cmsDriver.py TTbar_13TeV_TuneCUETP8M1_cfi  --conditions auto:run2_mc -n 200 --era Run2_2016 --eventcontent FEVTDEBUG --relval 18000,100 -s GEN,SIM --datatier GEN-SIM --beamspot Realistic50ns13TeVCollision --fileout file:step1.root --nThreads=8
+
+cmsDriver.py step2  --conditions auto:run2_mc -s DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@relval25ns --datatier GEN-SIM-DIGI-RAW-HLTDEBUG -n 1000 --era Run2_2016 --eventcontent FEVTDEBUGHLT --filein file:step1_TTbar_13TeV.root  --fileout file:step2.root --nThreads=16
+
+cmsDriver.py step3  --runUnscheduled  --conditions auto:run2_mc -s RAW2DIGI,L1Reco,RECO,EI,PAT --datatier GEN-SIM-RECO -n -1 --era Run2_2016 --eventcontent RECOSIM --filein file:step2.root  --fileout file:step3.root --nThreads=16
+
