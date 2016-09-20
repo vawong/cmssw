@@ -29,7 +29,7 @@ process.maxEvents = cms.untracked.PSet(
 )
 
 # Input Added Timing Monitoring
-process.Timing = cms.Service("Timing")
+#process.Timing = cms.Service("Timing")
 
 # Input source
 process.source = cms.Source("PoolSource",

@@ -31,7 +31,11 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source("PoolSource",
     dropDescendantsOfDroppedBranches = cms.untracked.bool(False),
-    fileNames = cms.untracked.vstring('file:step1.root'),
+    fileNames = cms.untracked.vstring(
+        'root://eoscms//eos/cms/store/cmst3/user/dalfonso/HCAL/step1_SinglePiE50HCAL.root'
+#        'root://eoscms//eos/cms/store/cmst3/user/dalfonso/HCAL/step1_TTbar_13TeV.root'
+#        'file:step1.root'
+        ),
     inputCommands = cms.untracked.vstring('keep *', 
         'drop *_genParticles_*_*', 
         'drop *_genParticlesForJets_*_*', 
