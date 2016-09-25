@@ -82,6 +82,7 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
       double Method0Energy;
       double RecHitEnergy;
       double RecHitTime;
+      double RecHitChi2;
       int LumiBlock;
       double iEta;
       double iPhi; 
@@ -104,6 +105,9 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
       TH1F *hCheckTimingMX_barrel_gt5;
       TH1F *hCheckTimingMX_endcap_gt5;
 
+      TH1F *hCheckChi2MX_barrel_gt5;
+      TH1F *hCheckChi2MX_endcap_gt5;
+
       TH1F *hCheckTimingMX_endcap_depth1_gt5;
       TH1F *hCheckTimingMX_endcap_depth2_gt5;
       TH1F *hCheckTimingMX_endcap_depth3_gt5;
@@ -118,16 +122,28 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
       TH1F *hCheckT45ratio_barrel;
       TH1F *hCheckT45ratio_endcap;
 
+      TProfile2D *hHBHEChi2;
+      TProfile2D *hHBHEChi2_depth1;
+      TProfile2D *hHBHEChi2_depth2;
+      TProfile2D *hHBHEChi2_depth3;
+      TProfile2D *hHBHEChi2_depth4;
+      TProfile2D *hHBHEChi2_depth5;
+      TProfile2D *hHBHEChi2_depth6;
+
+      TH2F *occupancy_d1;
+      TH2F *occupancy_d2;
+      TH2F *occupancy_d3;
+      TH2F *occupancy_d4;
+      TH2F *occupancy_d5;
+      TH2F *occupancy_d6;
+
   /*  
+
       // 2-d profiles which will hold the average time per channel, 1 for each depth
       TProfile2D *hHBHETiming_Depth1;
       TProfile2D *hHBHETiming_Depth2;
       TProfile2D *hHBHETiming_Depth3;
-      
-      TH2F *occupancy_d1;
-      TH2F *occupancy_d2;
-      TH2F *occupancy_d3;
-      
+
       // pointer to pointer to pointers to make a 2-d array of histograms
       // These are used to hold the individual rechit timing histograms for each channel
       TH1F ***hTiming_Depth1 = new TH1F**[59];
@@ -194,11 +210,26 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
   hCheckEnergyM0MX_barrel = FileService->make<TH2F>("M0MXplot_barrel","M0MXplot_barrel",20,0.,100.,20,0.,100.);
   hCheckEnergyM0MX_endcap = FileService->make<TH2F>("M0MXplot_endcap","M0MXplot_endcap",20,0.,100.,20,0.,100.);
 
+  hCheckEnergyM0MX_barrel->GetXaxis()->SetTitle("M0 Energy");
+  hCheckEnergyM0MX_endcap->GetXaxis()->SetTitle("M0 Energy");
+
+  hCheckEnergyM0MX_barrel->GetYaxis()->SetTitle("M2 Energy");
+  hCheckEnergyM0MX_endcap->GetYaxis()->SetTitle("M2 Energy");
+
   hCheckTimingMX_barrel = FileService->make<TH1F>("TimingMX_barrel","TimingMX_barrel",25,-12.5,12.5);
   hCheckTimingMX_endcap = FileService->make<TH1F>("TimingMX_endcap","TimingMX_endcap",25,-12.5,12.5);
 
   hCheckTimingMX_barrel_gt5 = FileService->make<TH1F>("TimingMX_barrel_gt5","TimingMX_barrel_gt5",25,-12.5,12.5);
   hCheckTimingMX_endcap_gt5 = FileService->make<TH1F>("TimingMX_endcap_gt5","TimingMX_endcap_gt5",25,-12.5,12.5);
+
+  hCheckTimingMX_barrel_gt5->GetXaxis()->SetTitle("M2 Timing");
+  hCheckTimingMX_endcap_gt5->GetXaxis()->SetTitle("M2 Timing");
+
+  hCheckChi2MX_barrel_gt5 = FileService->make<TH1F>("Chi2MX_barrel_gt5","chi2MX_barrel_gt5",1000,-10,500);
+  hCheckChi2MX_endcap_gt5 = FileService->make<TH1F>("Chi2MX_endcap_gt5","chi2MX_endcap_gt5",1000,-10,500);
+
+  hCheckChi2MX_barrel_gt5->GetXaxis()->SetTitle("M2 chi2");
+  hCheckChi2MX_endcap_gt5->GetXaxis()->SetTitle("M2 chi2");
 
   hCheckEnergyTiming_barrel = FileService->make<TH2F>("EnergyTiming_barrel","EnergyTiming_barrel",25,-12.5,12.5,20,0.,100.);
   hCheckEnergyTiming_endcap = FileService->make<TH2F>("EnergyTiming_endcap","EnergyTiming_endcap",25,-12.5,12.5,20,0.,100.);
@@ -213,6 +244,49 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
   hCheckTimingMX_endcap_depth2_gt5 = FileService->make<TH1F>("TimingMX_endcap_depth2_gt5","TimingMX_endcap_depth2_gt5",25,-12.5,12.5);
   hCheckTimingMX_endcap_depth3_gt5 = FileService->make<TH1F>("TimingMX_endcap_depth3_gt5","TimingMX_endcap_depth3_gt5",25,-12.5,12.5);
   hCheckTimingMX_endcap_depth4_gt5 = FileService->make<TH1F>("TimingMX_endcap_depth4_gt5","TimingMX_endcap_depth4_gt5",25,-12.5,12.5);
+
+  hHBHEChi2 = FileService->make<TProfile2D>("hHBHEChi2","hHBHEChi2",59,-29.5,29.5,72,0.5,72.5, 0, 950.,"s");
+  hHBHEChi2->GetXaxis()->SetTitle("i#eta");
+  hHBHEChi2->GetYaxis()->SetTitle("i#phi");
+  hHBHEChi2->GetZaxis()->SetTitle("M2 chi2");
+
+  hHBHEChi2_depth1 = FileService->make<TProfile2D>("hHBHEChi2_depth1","hHBHEChi2_depth1",59,-29.5,29.5,72,0.5,72.5, 0, 950.,"s");
+  hHBHEChi2_depth1->GetXaxis()->SetTitle("i#eta");
+  hHBHEChi2_depth1->GetYaxis()->SetTitle("i#phi");
+  hHBHEChi2_depth1->GetZaxis()->SetTitle("M2 chi2");
+
+  hHBHEChi2_depth2 = FileService->make<TProfile2D>("hHBHEChi2_depth2","hHBHEChi2_depth2",59,-29.5,29.5,72,0.5,72.5, 0, 950.,"s");
+  hHBHEChi2_depth2->GetXaxis()->SetTitle("i#eta");
+  hHBHEChi2_depth2->GetYaxis()->SetTitle("i#phi");
+  hHBHEChi2_depth2->GetZaxis()->SetTitle("M2 chi2");
+
+  hHBHEChi2_depth3 = FileService->make<TProfile2D>("hHBHEChi2_depth3","hHBHEChi2_depth3",59,-29.5,29.5,72,0.5,72.5, 0, 950.,"s");
+  hHBHEChi2_depth3->GetXaxis()->SetTitle("i#eta");
+  hHBHEChi2_depth3->GetYaxis()->SetTitle("i#phi");
+  hHBHEChi2_depth3->GetZaxis()->SetTitle("M2 chi2");
+
+  hHBHEChi2_depth4 = FileService->make<TProfile2D>("hHBHEChi2_depth4","hHBHEChi2_depth4",59,-29.5,29.5,72,0.5,72.5, 0, 950.,"s");
+  hHBHEChi2_depth4->GetXaxis()->SetTitle("i#eta");
+  hHBHEChi2_depth4->GetYaxis()->SetTitle("i#phi");
+  hHBHEChi2_depth4->GetZaxis()->SetTitle("M2 chi2");
+
+  hHBHEChi2_depth5 = FileService->make<TProfile2D>("hHBHEChi2_depth5","hHBHEChi2_depth5",59,-29.5,29.5,72,0.5,72.5, 0, 950.,"s");
+  hHBHEChi2_depth5->GetXaxis()->SetTitle("i#eta");
+  hHBHEChi2_depth5->GetYaxis()->SetTitle("i#phi");
+  hHBHEChi2_depth5->GetZaxis()->SetTitle("M2 chi2");
+
+  hHBHEChi2_depth6 = FileService->make<TProfile2D>("hHBHEChi2_depth6","hHBHEChi2_depth6",59,-29.5,29.5,72,0.5,72.5, 0, 950.,"s");
+  hHBHEChi2_depth6->GetXaxis()->SetTitle("i#eta");
+  hHBHEChi2_depth6->GetYaxis()->SetTitle("i#phi");
+  hHBHEChi2_depth6->GetZaxis()->SetTitle("M2 chi2");
+
+  occupancy_d1 = FileService->make<TH2F>("occupancy_d1","occupancy_depth1",59,-29.5,29.5,72,0.5,72.5);
+  occupancy_d2 = FileService->make<TH2F>("occupancy_d2","occupancy_depth2",59,-29.5,29.5,72,0.5,72.5);
+  occupancy_d3 = FileService->make<TH2F>("occupancy_d3","occupancy_depth3",59,-29.5,29.5,72,0.5,72.5);
+  occupancy_d4 = FileService->make<TH2F>("occupancy_d4","occupancy_depth4",59,-29.5,29.5,72,0.5,72.5);
+  occupancy_d5 = FileService->make<TH2F>("occupancy_d5","occupancy_depth5",59,-29.5,29.5,72,0.5,72.5);
+  occupancy_d6 = FileService->make<TH2F>("occupancy_d6","occupancy_depth6",59,-29.5,29.5,72,0.5,72.5);
+
 
 
 }
@@ -266,8 +340,9 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     Method0Energy = (*hRecHits)[i].eraw();
     RecHitEnergy = (*hRecHits)[i].energy();
     RecHitTime = (*hRecHits)[i].time();
+    RecHitChi2 = (*hRecHits)[i].chi2();
 
-    if(Method0Energy>5) cout << "energy="<< Method0Energy << "  ; chi2=" << (*hRecHits)[i].getChiSquared() << endl;
+    //    if(Method0Energy>5) cout << "energy="<< Method0Energy << "  ; chi2=" << (*hRecHits)[i].chi2() << endl;
     
     // this block of code is to extract the charge in individual time slices from 
     // the auxiliary information 
@@ -377,7 +452,26 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     if(std::abs(iEta) < 14 )  hCheckTimingMX_barrel->Fill(RecHitTime);
     if(std::abs(iEta) >=19  && std::abs(iEta)<=26 )  hCheckTimingMX_endcap->Fill(RecHitTime);
 
+    if(depth==1) occupancy_d1->Fill(detID_rh.ieta(), detID_rh.iphi(),1);
+    if(depth==2) occupancy_d2->Fill(detID_rh.ieta(), detID_rh.iphi(),1);
+    if(depth==3) occupancy_d3->Fill(detID_rh.ieta(), detID_rh.iphi(),1);
+    if(depth==4) occupancy_d4->Fill(detID_rh.ieta(), detID_rh.iphi(),1);
+    if(depth==5) occupancy_d5->Fill(detID_rh.ieta(), detID_rh.iphi(),1);
+    if(depth==6) occupancy_d6->Fill(detID_rh.ieta(), detID_rh.iphi(),1);
+
     if(Method0Energy>5) {
+
+      hHBHEChi2->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
+      if(Method0Energy>5 && depth==1) hHBHEChi2_depth1->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
+      if(Method0Energy>5 && depth==2) hHBHEChi2_depth2->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
+      if(Method0Energy>5 && depth==3) hHBHEChi2_depth3->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
+      if(Method0Energy>5 && depth==4) hHBHEChi2_depth4->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
+      if(Method0Energy>5 && depth==5) hHBHEChi2_depth5->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
+      if(Method0Energy>5 && depth==6) hHBHEChi2_depth6->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
+
+      if(std::abs(iEta) < 14 )  hCheckChi2MX_barrel_gt5->Fill(RecHitChi2);
+      if(std::abs(iEta) >=19  && std::abs(iEta)<=26 )  hCheckChi2MX_endcap_gt5->Fill(RecHitChi2);
+
 
       if(std::abs(iEta) < 14 )  hCheckTimingMX_barrel_gt5->Fill(RecHitTime);
       if(std::abs(iEta) >=19  && std::abs(iEta)<=26 )  hCheckTimingMX_endcap_gt5->Fill(RecHitTime);

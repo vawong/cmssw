@@ -83,6 +83,7 @@ class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       double Method0Energy;
       double RecHitEnergy;
       double RecHitTime;
+      double RecHitChi2;
 
       double Method0EnergyM0;
       double RecHitEnergyM0;
@@ -91,7 +92,6 @@ class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       double Method0EnergyM3;
       double RecHitEnergyM3;
       double RecHitTimeM3;
-
 
       int LumiBlock;
       double iEta;
@@ -109,7 +109,9 @@ class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       edm::EDGetTokenT<HORecHitCollection>    hOToken;
 
       TH1F *hCheckTimingM2;
+      TH1F *hCheckTimingM2_gt5;
       TH1F *hCheckEnergyM2;
+      TH1F *hCheckChi2M2_gt5;
 
       TH1F *hCheckTimingM3;
       TH1F *hCheckEnergyM3;
@@ -121,6 +123,10 @@ class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 
       TH2F *hCheckEnergyM2M3;
 
+      TProfile2D *hHBHEChi2;
+      TProfile2D *hHBHEChi2_depth1;
+      TProfile2D *hHBHEChi2_depth2;
+      TProfile2D *hHBHEChi2_depth3;
 };
 
 
@@ -150,15 +156,51 @@ MakeRun2Plots::MakeRun2Plots(const edm::ParameterSet& iConfig)
   hCheckTimingHO = FileService->make<TH1F>("TimingHO","TimingHO",100,60.,40.);
 
   hCheckTimingM2 = FileService->make<TH1F>("TimingM2","TimingM2",25,-12.5,12.5);
+  hCheckTimingM2->GetXaxis()->SetTitle("M2 Timing");
+  hCheckTimingM2_gt5 = FileService->make<TH1F>("TimingM2_gt5","TimingM2_gt5",25,-12.5,12.5);
+  hCheckTimingM2_gt5->GetXaxis()->SetTitle("M2 Timing");
+
   hCheckEnergyM2 = FileService->make<TH1F>("EnergyM2","EnergyM2",20,0.,100.);
+  hCheckEnergyM2->GetXaxis()->SetTitle("M2 Energy");
+
+  hCheckChi2M2_gt5 = FileService->make<TH1F>("Chi2M2_gt5","Chi2M2_gt5",1000,-10,500);
+  hCheckChi2M2_gt5->GetXaxis()->SetTitle("M2 chi2");
+
+  /////
+
+  hHBHEChi2 = FileService->make<TProfile2D>("hHBHEChi2","hHBHEChi2",59,-29.5,29.5,72,0.5,72.5, 0, 500.,"s");
+  hHBHEChi2->GetXaxis()->SetTitle("#eta");
+  hHBHEChi2->GetYaxis()->SetTitle("#phi");
+  hHBHEChi2->GetZaxis()->SetTitle("M2 chi2");
+
+  hHBHEChi2_depth1 = FileService->make<TProfile2D>("hHBHEChi2_depth1","hHBHEChi2_depth1",59,-29.5,29.5,72,0.5,72.5, 0, 500.,"s");
+  hHBHEChi2_depth1->GetXaxis()->SetTitle("#eta");
+  hHBHEChi2_depth1->GetYaxis()->SetTitle("#phi");
+  hHBHEChi2_depth1->GetZaxis()->SetTitle("M2 chi2");
+
+  hHBHEChi2_depth2 = FileService->make<TProfile2D>("hHBHEChi2_depth2","hHBHEChi2_depth2",59,-29.5,29.5,72,0.5,72.5, 0, 500.,"s");
+  hHBHEChi2_depth2->GetXaxis()->SetTitle("#eta");
+  hHBHEChi2_depth2->GetYaxis()->SetTitle("#phi");
+  hHBHEChi2_depth2->GetZaxis()->SetTitle("M2 chi2");
+
+  hHBHEChi2_depth3 = FileService->make<TProfile2D>("hHBHEChi2_depth3","hHBHEChi2_depth3",59,-29.5,29.5,72,0.5,72.5, 0, 500.,"s");
+  hHBHEChi2_depth3->GetXaxis()->SetTitle("#eta");
+  hHBHEChi2_depth3->GetYaxis()->SetTitle("#phi");
+  hHBHEChi2_depth3->GetZaxis()->SetTitle("M2 chi2");
+
+  /////
 
   hCheckTimingM0 = FileService->make<TH1F>("TimingM0","TimingM0",25,-12.5,12.5);
   hCheckEnergyM0 = FileService->make<TH1F>("EnergyM0","EnergyM0",20,0.,100.);
 
   hCheckTimingM3 = FileService->make<TH1F>("TimingM3","TimingM3",25,-12.5,12.5);
   hCheckEnergyM3 = FileService->make<TH1F>("EnergyM3","EnergyM3",20,0.,100.);
+  hCheckEnergyM3->GetXaxis()->SetTitle("M3 Energy");
 
   hCheckEnergyM2M3 = FileService->make<TH2F>("EnergyM2M3","EnergyM2M3",20,0.,100.,20,0.,100.);
+  hCheckEnergyM2M3->GetXaxis()->SetTitle("M2 Energy");
+  hCheckEnergyM2M3->GetXaxis()->SetTitle("M3 Energy");
+
 
 }
 
@@ -208,9 +250,17 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     Method0Energy = (*hRecHits)[i].eraw();
     RecHitEnergy = (*hRecHits)[i].energy();
     RecHitTime = (*hRecHits)[i].time();
+    RecHitChi2 = (*hRecHits)[i].chi2();
 
-    hCheckTimingM2->Fill(RecHitTime);
     hCheckEnergyM2->Fill(RecHitEnergy);
+    hCheckTimingM2->Fill(RecHitTime);
+    if(Method0Energy>5) hCheckTimingM2_gt5->Fill(RecHitTime);
+    if(Method0Energy>5) hCheckChi2M2_gt5->Fill(RecHitChi2);
+
+    if(Method0Energy>5) hHBHEChi2->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
+    if(Method0Energy>5 && depth==1) hHBHEChi2_depth1->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
+    if(Method0Energy>5 && depth==2) hHBHEChi2_depth2->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
+    if(Method0Energy>5 && depth==3) hHBHEChi2_depth3->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
 
   } // recHit
 
