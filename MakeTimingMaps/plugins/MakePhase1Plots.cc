@@ -99,8 +99,18 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
       TH2F *hCheckEnergyM0MX_barrel;
       TH2F *hCheckEnergyM0MX_endcap;
 
-      TH1F *hCheckTimingMX_barrel;
-      TH1F *hCheckTimingMX_endcap;
+      TH1F *hCheckEnergyM2_barrel;
+      TH1F *hCheckEnergyM2_endcap;
+
+      TH1F *hCheckEnergyM2_endcap_depth1;
+      TH1F *hCheckEnergyM2_endcap_depth2;
+      TH1F *hCheckEnergyM2_endcap_depth3;
+      TH1F *hCheckEnergyM2_endcap_depth4;
+      TH1F *hCheckEnergyM2_endcap_depth5;
+      TH1F *hCheckEnergyM2_endcap_depth6;
+
+      TH1F *hCheckTimingM2_barrel;
+      TH1F *hCheckTimingM2_endcap;
 
       TH1F *hCheckTimingMX_barrel_gt5;
       TH1F *hCheckTimingMX_endcap_gt5;
@@ -121,6 +131,9 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
 
       TH1F *hCheckT45ratio_barrel;
       TH1F *hCheckT45ratio_endcap;
+
+      TH2F *hChi2Energy_barrel;
+      TH2F *hChi2Energy_endcap;
 
       TProfile2D *hHBHEChi2;
       TProfile2D *hHBHEChi2_depth1;
@@ -207,8 +220,22 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
   timeHigh_ = iConfig.getParameter<double>("timeHighBound");
   */
 
-  hCheckEnergyM0MX_barrel = FileService->make<TH2F>("M0MXplot_barrel","M0MXplot_barrel",20,0.,100.,20,0.,100.);
-  hCheckEnergyM0MX_endcap = FileService->make<TH2F>("M0MXplot_endcap","M0MXplot_endcap",20,0.,100.,20,0.,100.);
+  hChi2Energy_barrel = FileService->make<TH2F>("hChi2Energy_barrel","hChi2Energy_barrel",100,0.,500.,100,-2, 4.);
+  hChi2Energy_endcap = FileService->make<TH2F>("hChi2Energy_endcap","hChi2Energy_endcap",100,0.,500.,100,-2, 4.);
+
+  hChi2Energy_barrel->GetXaxis()->SetTitle("M2 energy");
+  hChi2Energy_barrel->GetYaxis()->SetTitle("log10 (M2 chi2)");
+  hChi2Energy_endcap->GetXaxis()->SetTitle("M2 energy");
+  hChi2Energy_endcap->GetYaxis()->SetTitle("log10 (M2 chi2)");
+
+  hCheckChi2MX_barrel_gt5 = FileService->make<TH1F>("Chi2MX_barrel_gt5","chi2MX_barrel_gt5",100, -2, 4.);
+  hCheckChi2MX_endcap_gt5 = FileService->make<TH1F>("Chi2MX_endcap_gt5","chi2MX_endcap_gt5",100, -2, 4.);
+
+  hCheckChi2MX_barrel_gt5->GetXaxis()->SetTitle("log10 (M2 chi2)");
+  hCheckChi2MX_endcap_gt5->GetXaxis()->SetTitle("log10 (M2 chi2)");
+
+  hCheckEnergyM0MX_barrel = FileService->make<TH2F>("M0MXplot_barrel","M0MXplot_barrel",100,0.,500.,100,0.,500.);
+  hCheckEnergyM0MX_endcap = FileService->make<TH2F>("M0MXplot_endcap","M0MXplot_endcap",100,0.,500.,100,0.,500.);
 
   hCheckEnergyM0MX_barrel->GetXaxis()->SetTitle("M0 Energy");
   hCheckEnergyM0MX_endcap->GetXaxis()->SetTitle("M0 Energy");
@@ -216,8 +243,23 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
   hCheckEnergyM0MX_barrel->GetYaxis()->SetTitle("M2 Energy");
   hCheckEnergyM0MX_endcap->GetYaxis()->SetTitle("M2 Energy");
 
-  hCheckTimingMX_barrel = FileService->make<TH1F>("TimingMX_barrel","TimingMX_barrel",25,-12.5,12.5);
-  hCheckTimingMX_endcap = FileService->make<TH1F>("TimingMX_endcap","TimingMX_endcap",25,-12.5,12.5);
+  //  hCheckEnergyM2_barrel = FileService->make<TH1F>("EnergyM2_barrel","EnergyM2_barrel", 500, 0., 500.);
+  //  hCheckEnergyM2_endcap = FileService->make<TH1F>("EnergyM2_endcap","EnergyM2_endcap", 500, 0., 500.);
+
+  hCheckEnergyM2_barrel = FileService->make<TH1F>("EnergyM2_barrel","EnergyM2_barrel",1000,0.,10.);
+  hCheckEnergyM2_endcap = FileService->make<TH1F>("EnergyM2_endcap","EnergyM2_endcap",1000,0.,10.);
+
+  hCheckEnergyM2_endcap_depth1 = FileService->make<TH1F>("EnergyM2_endcap_depth1","EnergyM2_endcap_depth1",20,0.,100.);
+  hCheckEnergyM2_endcap_depth2 = FileService->make<TH1F>("EnergyM2_endcap_depth2","EnergyM2_endcap_depth2",20,0.,100.);
+  hCheckEnergyM2_endcap_depth3 = FileService->make<TH1F>("EnergyM2_endcap_depth3","EnergyM2_endcap_depth3",20,0.,100.);
+  hCheckEnergyM2_endcap_depth4 = FileService->make<TH1F>("EnergyM2_endcap_depth4","EnergyM2_endcap_depth4",20,0.,100.);
+  hCheckEnergyM2_endcap_depth5 = FileService->make<TH1F>("EnergyM2_endcap_depth5","EnergyM2_endcap_depth5",20,0.,100.);
+  hCheckEnergyM2_endcap_depth6 = FileService->make<TH1F>("EnergyM2_endcap_depth6","EnergyM2_endcap_depth6",20,0.,100.);
+
+  ////
+
+  hCheckTimingM2_barrel = FileService->make<TH1F>("TimingM2_barrel","TimingM2_barrel",25,-12.5,12.5);
+  hCheckTimingM2_endcap = FileService->make<TH1F>("TimingM2_endcap","TimingM2_endcap",25,-12.5,12.5);
 
   hCheckTimingMX_barrel_gt5 = FileService->make<TH1F>("TimingMX_barrel_gt5","TimingMX_barrel_gt5",25,-12.5,12.5);
   hCheckTimingMX_endcap_gt5 = FileService->make<TH1F>("TimingMX_endcap_gt5","TimingMX_endcap_gt5",25,-12.5,12.5);
@@ -225,11 +267,11 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
   hCheckTimingMX_barrel_gt5->GetXaxis()->SetTitle("M2 Timing");
   hCheckTimingMX_endcap_gt5->GetXaxis()->SetTitle("M2 Timing");
 
-  hCheckChi2MX_barrel_gt5 = FileService->make<TH1F>("Chi2MX_barrel_gt5","chi2MX_barrel_gt5",1000,-10,500);
-  hCheckChi2MX_endcap_gt5 = FileService->make<TH1F>("Chi2MX_endcap_gt5","chi2MX_endcap_gt5",1000,-10,500);
+  hCheckChi2MX_barrel_gt5 = FileService->make<TH1F>("Chi2MX_barrel_gt5","chi2MX_barrel_gt5",100, -2, 4.);
+  hCheckChi2MX_endcap_gt5 = FileService->make<TH1F>("Chi2MX_endcap_gt5","chi2MX_endcap_gt5",100, -2, 4.);
 
-  hCheckChi2MX_barrel_gt5->GetXaxis()->SetTitle("M2 chi2");
-  hCheckChi2MX_endcap_gt5->GetXaxis()->SetTitle("M2 chi2");
+  hCheckChi2MX_barrel_gt5->GetXaxis()->SetTitle("log10 (M2 chi2)");
+  hCheckChi2MX_endcap_gt5->GetXaxis()->SetTitle("log10 (M2 chi2)");
 
   hCheckEnergyTiming_barrel = FileService->make<TH2F>("EnergyTiming_barrel","EnergyTiming_barrel",25,-12.5,12.5,20,0.,100.);
   hCheckEnergyTiming_endcap = FileService->make<TH2F>("EnergyTiming_endcap","EnergyTiming_endcap",25,-12.5,12.5,20,0.,100.);
@@ -342,7 +384,8 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     RecHitTime = (*hRecHits)[i].time();
     RecHitChi2 = (*hRecHits)[i].chi2();
 
-    //    if(Method0Energy>5) cout << "energy="<< Method0Energy << "  ; chi2=" << (*hRecHits)[i].chi2() << endl;
+    //    cout << " energy M2= " << RecHitEnergy << " RecHitTime M2=" << RecHitTime << " RecHitChi2=" << RecHitChi2 << endl;
+   //    if(Method0Energy>5) cout << "energy="<< Method0Energy << "  ; chi2=" << (*hRecHits)[i].chi2() << endl;
     
     // this block of code is to extract the charge in individual time slices from 
     // the auxiliary information 
@@ -449,8 +492,8 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     if(std::abs(iEta) < 14 )  hCheckEnergyM0MX_barrel->Fill(Method0Energy,RecHitEnergy);
     if(std::abs(iEta) >=19  && std::abs(iEta)<=26 )  hCheckEnergyM0MX_endcap->Fill(Method0Energy,RecHitEnergy);
 
-    if(std::abs(iEta) < 14 )  hCheckTimingMX_barrel->Fill(RecHitTime);
-    if(std::abs(iEta) >=19  && std::abs(iEta)<=26 )  hCheckTimingMX_endcap->Fill(RecHitTime);
+    if(std::abs(iEta) < 14 )  hChi2Energy_barrel->Fill(RecHitEnergy,log10(RecHitChi2));
+    if(std::abs(iEta) >=19  && std::abs(iEta)<=26 )  hChi2Energy_endcap->Fill(RecHitEnergy,log10(RecHitChi2));
 
     if(depth==1) occupancy_d1->Fill(detID_rh.ieta(), detID_rh.iphi(),1);
     if(depth==2) occupancy_d2->Fill(detID_rh.ieta(), detID_rh.iphi(),1);
@@ -459,7 +502,28 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     if(depth==5) occupancy_d5->Fill(detID_rh.ieta(), detID_rh.iphi(),1);
     if(depth==6) occupancy_d6->Fill(detID_rh.ieta(), detID_rh.iphi(),1);
 
+    if(RecHitEnergy!=0 && std::abs(iEta) < 16 ) {
+      hCheckEnergyM2_barrel->Fill(RecHitEnergy);
+      hCheckTimingM2_barrel->Fill(RecHitTime);
+    }
+    if(RecHitEnergy!=0 && std::abs(iEta) > 16 ) {
+      hCheckEnergyM2_endcap->Fill(RecHitEnergy);
+      hCheckTimingM2_endcap->Fill(RecHitTime);
+    }
+
+    if(Method0Energy>1) {
+      if(depth==1) hCheckEnergyM2_endcap_depth1->Fill(RecHitEnergy);
+      if(depth==2) hCheckEnergyM2_endcap_depth2->Fill(RecHitEnergy);
+      if(depth==3) hCheckEnergyM2_endcap_depth3->Fill(RecHitEnergy);
+      if(depth==4) hCheckEnergyM2_endcap_depth4->Fill(RecHitEnergy);
+      if(depth==5) hCheckEnergyM2_endcap_depth5->Fill(RecHitEnergy);
+      if(depth==6) hCheckEnergyM2_endcap_depth6->Fill(RecHitEnergy);
+    }
+
     if(Method0Energy>5) {
+
+      if(std::abs(iEta) < 14 )  hCheckChi2MX_barrel_gt5->Fill(log10(RecHitChi2));
+      if(std::abs(iEta) >=17  && std::abs(iEta)<=28 )  hCheckChi2MX_endcap_gt5->Fill(log10(RecHitChi2));
 
       hHBHEChi2->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
       if(Method0Energy>5 && depth==1) hHBHEChi2_depth1->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
@@ -468,9 +532,6 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       if(Method0Energy>5 && depth==4) hHBHEChi2_depth4->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
       if(Method0Energy>5 && depth==5) hHBHEChi2_depth5->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
       if(Method0Energy>5 && depth==6) hHBHEChi2_depth6->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
-
-      if(std::abs(iEta) < 14 )  hCheckChi2MX_barrel_gt5->Fill(RecHitChi2);
-      if(std::abs(iEta) >=19  && std::abs(iEta)<=26 )  hCheckChi2MX_endcap_gt5->Fill(RecHitChi2);
 
 
       if(std::abs(iEta) < 14 )  hCheckTimingMX_barrel_gt5->Fill(RecHitTime);
