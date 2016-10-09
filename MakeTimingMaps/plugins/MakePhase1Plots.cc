@@ -220,16 +220,16 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
   timeHigh_ = iConfig.getParameter<double>("timeHighBound");
   */
 
-  hChi2Energy_barrel = FileService->make<TH2F>("hChi2Energy_barrel","hChi2Energy_barrel",100,0.,500.,100,-2, 4.);
-  hChi2Energy_endcap = FileService->make<TH2F>("hChi2Energy_endcap","hChi2Energy_endcap",100,0.,500.,100,-2, 4.);
+  hChi2Energy_barrel = FileService->make<TH2F>("hChi2Energy_barrel","hChi2Energy_barrel",100,0.,500.,100,-2, 5.);
+  hChi2Energy_endcap = FileService->make<TH2F>("hChi2Energy_endcap","hChi2Energy_endcap",100,0.,500.,100,-2, 5.);
 
   hChi2Energy_barrel->GetXaxis()->SetTitle("M2 energy");
   hChi2Energy_barrel->GetYaxis()->SetTitle("log10 (M2 chi2)");
   hChi2Energy_endcap->GetXaxis()->SetTitle("M2 energy");
   hChi2Energy_endcap->GetYaxis()->SetTitle("log10 (M2 chi2)");
 
-  hCheckChi2MX_barrel_gt5 = FileService->make<TH1F>("Chi2MX_barrel_gt5","chi2MX_barrel_gt5",100, -2, 4.);
-  hCheckChi2MX_endcap_gt5 = FileService->make<TH1F>("Chi2MX_endcap_gt5","chi2MX_endcap_gt5",100, -2, 4.);
+  hCheckChi2MX_barrel_gt5 = FileService->make<TH1F>("Chi2MX_barrel_gt5","chi2MX_barrel_gt5",100, -2, 5.);
+  hCheckChi2MX_endcap_gt5 = FileService->make<TH1F>("Chi2MX_endcap_gt5","chi2MX_endcap_gt5",100, -2, 5.);
 
   hCheckChi2MX_barrel_gt5->GetXaxis()->SetTitle("log10 (M2 chi2)");
   hCheckChi2MX_endcap_gt5->GetXaxis()->SetTitle("log10 (M2 chi2)");
@@ -267,14 +267,18 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
   hCheckTimingMX_barrel_gt5->GetXaxis()->SetTitle("M2 Timing");
   hCheckTimingMX_endcap_gt5->GetXaxis()->SetTitle("M2 Timing");
 
-  hCheckChi2MX_barrel_gt5 = FileService->make<TH1F>("Chi2MX_barrel_gt5","chi2MX_barrel_gt5",100, -2, 4.);
-  hCheckChi2MX_endcap_gt5 = FileService->make<TH1F>("Chi2MX_endcap_gt5","chi2MX_endcap_gt5",100, -2, 4.);
+  hCheckChi2MX_barrel_gt5 = FileService->make<TH1F>("Chi2MX_barrel_gt5","chi2MX_barrel_gt5",100, -2, 5.);
+  hCheckChi2MX_endcap_gt5 = FileService->make<TH1F>("Chi2MX_endcap_gt5","chi2MX_endcap_gt5",100, -2, 5.);
 
   hCheckChi2MX_barrel_gt5->GetXaxis()->SetTitle("log10 (M2 chi2)");
   hCheckChi2MX_endcap_gt5->GetXaxis()->SetTitle("log10 (M2 chi2)");
 
-  hCheckEnergyTiming_barrel = FileService->make<TH2F>("EnergyTiming_barrel","EnergyTiming_barrel",25,-12.5,12.5,20,0.,100.);
-  hCheckEnergyTiming_endcap = FileService->make<TH2F>("EnergyTiming_endcap","EnergyTiming_endcap",25,-12.5,12.5,20,0.,100.);
+  hCheckEnergyTiming_barrel = FileService->make<TH2F>("EnergyTiming_barrel","EnergyTiming_barrel",20,0.,500., 40,-20.,20.);
+  hCheckEnergyTiming_endcap = FileService->make<TH2F>("EnergyTiming_endcap","EnergyTiming_endcap",20,0.,500., 40,-20.,20.);
+  hCheckEnergyTiming_barrel->GetXaxis()->SetTitle("M2 energy");
+  hCheckEnergyTiming_barrel->GetYaxis()->SetTitle("M2 timing");
+  hCheckEnergyTiming_endcap->GetXaxis()->SetTitle("M2 energy");
+  hCheckEnergyTiming_endcap->GetYaxis()->SetTitle("M2 timing");
 
   hCheckT45ratioVST4_barrel = FileService->make<TH2F>("T45ratioVST4_barrel","T45ratioVST4_barrel", 30,0.,3., 500,0.,500.);
   hCheckT45ratioVST4_endcap = FileService->make<TH2F>("T45ratioVST4_endcap","T45ratioVST4_endcap", 30,0.,3., 500,0.,500.);
@@ -520,6 +524,9 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       if(depth==6) hCheckEnergyM2_endcap_depth6->Fill(RecHitEnergy);
     }
 
+    if( std::abs(iEta) < 14 ) hCheckEnergyTiming_barrel->Fill(RecHitEnergy,RecHitTime);
+    if( std::abs(iEta) >=19  && std::abs(iEta)<=26  ) hCheckEnergyTiming_endcap->Fill(RecHitEnergy,RecHitTime);
+
     if(Method0Energy>5) {
 
       if(std::abs(iEta) < 14 )  hCheckChi2MX_barrel_gt5->Fill(log10(RecHitChi2));
@@ -536,9 +543,6 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
       if(std::abs(iEta) < 14 )  hCheckTimingMX_barrel_gt5->Fill(RecHitTime);
       if(std::abs(iEta) >=19  && std::abs(iEta)<=26 )  hCheckTimingMX_endcap_gt5->Fill(RecHitTime);
-
-      if( std::abs(iEta) < 14 ) hCheckEnergyTiming_barrel->Fill(RecHitTime,Method0Energy);
-      if( std::abs(iEta) >=19  && std::abs(iEta)<=26  ) hCheckEnergyTiming_endcap->Fill(RecHitTime,Method0Energy);
 
       if(std::abs(iEta) >=19  && std::abs(iEta)<=26 ) {
 	if(depth==1) hCheckTimingMX_endcap_depth1_gt5->Fill(RecHitTime);
