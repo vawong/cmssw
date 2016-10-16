@@ -46,6 +46,7 @@ using namespace std;
 #include "DataFormats/HcalRecHit/interface/HBHERecHit.h"
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
 #include "DataFormats/HcalDetId/interface/HcalDetId.h"
+#include "DataFormats/HcalRecHit/interface/HBHEChannelInfo.h"
 
 #include "SimDataFormats/CaloHit/interface/PCaloHit.h"
 #include "SimDataFormats/CaloHit/interface/PCaloHitContainer.h"
@@ -94,8 +95,10 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
       edm::Service<TFileService> FileService;
       // create the token to retrieve hit information
       edm::EDGetTokenT<HBHERecHitCollection>    hRhToken;
+      edm::EDGetTokenT<HBHEChannelInfoCollection>    InfoToken;
       edm::EDGetTokenT<bool> hIsoToken;
     
+
       TH2F *hCheckEnergyM0MX_barrel;
       TH2F *hCheckEnergyM0MX_endcap;
 
@@ -185,6 +188,11 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
       
       // Sample histogram for storing time slice information
       TH1F *hTimeSlices;
+      TProfile *hTimeSlicesAverage_HB;
+      TProfile *hTimeSlicesAverageFC_HB;
+
+      TProfile *hTimeSlicesAverage_HE;
+      TProfile *hTimeSlicesAverageFC_HE;
       
       int runNumber_;
       double energyCut_;
@@ -201,12 +209,13 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
 
 MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
 {
-   //now do what ever initialization is needed
-   usesResource("TFileService");
+  //now do what ever initialization is needed
+  usesResource("TFileService");
 
   // Tell which collection is consumed
-   hRhToken = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbhereco"));
-   //  hRhToken = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbheprereco"));
+  hRhToken = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbhereco"));
+  InfoToken = consumes<HBHEChannelInfoCollection>(iConfig.getUntrackedParameter<string>("HBHEChannelInfo","hbheprereco"));
+  //  hRhToken = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbheprereco"));
   hIsoToken = consumes<bool >(iConfig.getUntrackedParameter<string>("HBHENoiseFilterResultProducer", "HBHEIsoNoiseFilterResult"));
   
 
@@ -333,6 +342,64 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
   occupancy_d5 = FileService->make<TH2F>("occupancy_d5","occupancy_depth5",59,-29.5,29.5,72,0.5,72.5);
   occupancy_d6 = FileService->make<TH2F>("occupancy_d6","occupancy_depth6",59,-29.5,29.5,72,0.5,72.5);
 
+  hTimeSlicesAverage_HB = FileService->make<TProfile>("hTimeSlicesAverage_HB","hTimeSlicesAverage_HB",10,0.,10,.0,500.); // 10,0,10 timeslices //.0,500. ADC
+  hTimeSlicesAverage_HB->GetXaxis()->SetBinLabel(1,"TS0");
+  hTimeSlicesAverage_HB->GetXaxis()->SetBinLabel(2,"TS1");
+  hTimeSlicesAverage_HB->GetXaxis()->SetBinLabel(3,"TS2");
+  hTimeSlicesAverage_HB->GetXaxis()->SetBinLabel(4,"TS3");
+  hTimeSlicesAverage_HB->GetXaxis()->SetBinLabel(5,"TS4");
+  hTimeSlicesAverage_HB->GetXaxis()->SetBinLabel(6,"TS5");
+  hTimeSlicesAverage_HB->GetXaxis()->SetBinLabel(7,"TS6");
+  hTimeSlicesAverage_HB->GetXaxis()->SetBinLabel(8,"TS7");
+  hTimeSlicesAverage_HB->GetXaxis()->SetBinLabel(9,"TS8");
+  hTimeSlicesAverage_HB->GetXaxis()->SetBinLabel(10,"TS9");
+  hTimeSlicesAverage_HB->SetTitle("");
+  hTimeSlicesAverage_HB->GetYaxis()->SetTitle("tsAdc");
+
+  hTimeSlicesAverage_HE = FileService->make<TProfile>("hTimeSlicesAverage_HE","hTimeSlicesAverage_HE",10,0.,10,.0,500.); // 10,0,10 timeslices //.0,500. ADC
+  hTimeSlicesAverage_HE->GetXaxis()->SetBinLabel(1,"TS0");
+  hTimeSlicesAverage_HE->GetXaxis()->SetBinLabel(2,"TS1");
+  hTimeSlicesAverage_HE->GetXaxis()->SetBinLabel(3,"TS2");
+  hTimeSlicesAverage_HE->GetXaxis()->SetBinLabel(4,"TS3");
+  hTimeSlicesAverage_HE->GetXaxis()->SetBinLabel(5,"TS4");
+  hTimeSlicesAverage_HE->GetXaxis()->SetBinLabel(6,"TS5");
+  hTimeSlicesAverage_HE->GetXaxis()->SetBinLabel(7,"TS6");
+  hTimeSlicesAverage_HE->GetXaxis()->SetBinLabel(8,"TS7");
+  hTimeSlicesAverage_HE->GetXaxis()->SetBinLabel(9,"TS8");
+  hTimeSlicesAverage_HE->GetXaxis()->SetBinLabel(10,"TS9");
+  hTimeSlicesAverage_HE->SetTitle("");
+  hTimeSlicesAverage_HE->GetYaxis()->SetTitle("tsAdc");
+
+  ///
+
+  hTimeSlicesAverageFC_HB = FileService->make<TProfile>("hTimeSlicesAverageFC_HB","hTimeSlicesAverageFC_HB",10,0.,10,.0,1000.); // 10,0,10 timeslices //.0,500. fC
+  hTimeSlicesAverageFC_HB->GetXaxis()->SetBinLabel(1,"TS0");
+  hTimeSlicesAverageFC_HB->GetXaxis()->SetBinLabel(2,"TS1");
+  hTimeSlicesAverageFC_HB->GetXaxis()->SetBinLabel(3,"TS2");
+  hTimeSlicesAverageFC_HB->GetXaxis()->SetBinLabel(4,"TS3");
+  hTimeSlicesAverageFC_HB->GetXaxis()->SetBinLabel(5,"TS4");
+  hTimeSlicesAverageFC_HB->GetXaxis()->SetBinLabel(6,"TS5");
+  hTimeSlicesAverageFC_HB->GetXaxis()->SetBinLabel(7,"TS6");
+  hTimeSlicesAverageFC_HB->GetXaxis()->SetBinLabel(8,"TS7");
+  hTimeSlicesAverageFC_HB->GetXaxis()->SetBinLabel(9,"TS8");
+  hTimeSlicesAverageFC_HB->GetXaxis()->SetBinLabel(10,"TS9");
+  hTimeSlicesAverageFC_HB->SetTitle("");
+  hTimeSlicesAverageFC_HB->GetYaxis()->SetTitle("fC");
+
+
+  hTimeSlicesAverageFC_HE = FileService->make<TProfile>("hTimeSlicesAverageFC_HE","hTimeSlicesAverageFC_HE",10,0.,10,.0,700000.); // 10,0,10 timeslices //.0,700000. fC
+  hTimeSlicesAverageFC_HE->GetXaxis()->SetBinLabel(1,"TS0");
+  hTimeSlicesAverageFC_HE->GetXaxis()->SetBinLabel(2,"TS1");
+  hTimeSlicesAverageFC_HE->GetXaxis()->SetBinLabel(3,"TS2");
+  hTimeSlicesAverageFC_HE->GetXaxis()->SetBinLabel(4,"TS3");
+  hTimeSlicesAverageFC_HE->GetXaxis()->SetBinLabel(5,"TS4");
+  hTimeSlicesAverageFC_HE->GetXaxis()->SetBinLabel(6,"TS5");
+  hTimeSlicesAverageFC_HE->GetXaxis()->SetBinLabel(7,"TS6");
+  hTimeSlicesAverageFC_HE->GetXaxis()->SetBinLabel(8,"TS7");
+  hTimeSlicesAverageFC_HE->GetXaxis()->SetBinLabel(9,"TS8");
+  hTimeSlicesAverageFC_HE->GetXaxis()->SetBinLabel(10,"TS9");
+  hTimeSlicesAverageFC_HE->SetTitle("");
+  hTimeSlicesAverageFC_HE->GetYaxis()->SetTitle("fC");
 
 
 }
@@ -358,7 +425,43 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   // Read events
   Handle<HBHERecHitCollection> hRecHits; // create handle
   iEvent.getByToken(hRhToken, hRecHits); // get events based on token
-  
+
+  Handle<HBHEChannelInfoCollection> channelData; // create handle
+  iEvent.getByToken(InfoToken, channelData); // get events based on token
+
+  // Loop over all rechits in one event
+  for(int i = 0; i < (int) channelData->size(); i++) {
+
+    const unsigned cssize = (*channelData)[i].nSamples();
+    //    cout << "cssize="<< cssize << endl;
+
+    double tstrig=0;
+    for(unsigned int ip=0; ip<cssize; ++ip){
+
+      double charge = (*channelData)[i].tsRawCharge(ip);
+      double ped = (*channelData)[i].tsPedestal(ip); // ped and gain are not function of the timeslices but of the det ?
+      double gain = (*channelData)[i].tsGain(ip);
+      double energy = (charge-ped)*gain;
+
+      if( ip ==4 || ip==5 ){
+	tstrig += energy;
+      }
+    }
+
+    for(unsigned int ip=0; ip<cssize; ++ip){
+
+      double charge = (*channelData)[i].tsRawCharge(ip);
+      double ped = (*channelData)[i].tsPedestal(ip); // ped and gain are not function of the timeslices but of the det ?
+      //      if(tstrig>5) hTimeSlicesAverageFC->Fill(ip,charge-ped);
+
+      if(tstrig>50) {
+	if(!(*channelData)[i].hasTimeInfo()) hTimeSlicesAverageFC_HB->Fill(ip,charge-ped);
+	if((*channelData)[i].hasTimeInfo()) hTimeSlicesAverageFC_HE->Fill(ip,charge-ped);
+      }
+    }
+
+  }
+
   double TS4=-100;
   double TS5=0.;
 
@@ -423,8 +526,21 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     TS4=adc[4];
     TS5=adc[5];    
 
+
+    if(Method0Energy>5){
+      for(int nadc = 0; nadc < 10; nadc++){
+	if(std::abs(iEta) < 15) {
+	  hTimeSlicesAverage_HB->Fill(nadc,adc[nadc]);
+	} else {
+	  hTimeSlicesAverage_HE->Fill(nadc,adc[nadc]);
+	}
+      }
+    }
+
     // example on how to fill the time slices if you need it
     if(Method0Energy > 20){
+    //    if((RecHitEnergy/Method0Energy)<0.8 && Method0Energy>200){
+    //    if(RecHitChi2>20000 && Method0Energy>10){
 
       hTimeSlices = FileService->make<TH1F>(Form("hTimeSlices_%4.2f",Method0Energy),Form("hTimeSlices_%4.2f",Method0Energy),10,-100,150);
 
@@ -459,13 +575,13 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       //pedestal Line
 
       double ped=3;
-      if(std::abs(iEta) < 14) ped=3.;
-      if(std::abs(iEta) >=19  && std::abs(iEta)<=26) ped=17.3;
+      if(std::abs(iEta) < 14) ped=3.; // these are fC
+      if(std::abs(iEta) >=19  && std::abs(iEta)<=26) ped=17.3; // these are fC
 
       TLine *line = new TLine(hTimeSlices->GetXaxis()->GetBinLowEdge(0),ped,hTimeSlices->GetXaxis()->GetBinUpEdge(hTimeSlices->GetXaxis()->GetNbins()),ped);
       line->SetLineColor(kRed);
       line->SetLineWidth(3);
-      line->Draw("same");
+      //      line->Draw("same");
 
       ///////////// 
 
@@ -475,7 +591,12 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       //      t->SetTextSize(0.08);
       t->SetTextAlign(12);
       t->SetTextSize(0.05);
-      t->DrawLatex(hTimeSlices->GetXaxis()->GetBinLowEdge(1),1.1*hTimeSlices->GetMaximum(),Form("M0=%4.2f  ieta=%d iphi=%d depth=%d ,    M2=%4.2f",Method0Energy,detID_rh.ieta(),detID_rh.iphi(),depth,RecHitEnergy));
+      t->DrawLatex(hTimeSlices->GetXaxis()->GetBinLowEdge(1)+1.0,1.1*hTimeSlices->GetMaximum(),Form("M0=%4.1f   M2=%4.1f   M2time=%4.1f  log_{10}(M2chi2)=%4.1f",Method0Energy,
+												    RecHitEnergy,RecHitTime,log10(RecHitChi2)));
+      t->DrawLatex(hTimeSlices->GetXaxis()->GetBinLowEdge(1)+20.0,0.95*hTimeSlices->GetMaximum(),Form("i#eta=%d",detID_rh.ieta()));
+      t->DrawLatex(hTimeSlices->GetXaxis()->GetBinLowEdge(1)+20.0,0.9*hTimeSlices->GetMaximum(),Form("i#phi=%d",detID_rh.iphi()));
+      t->DrawLatex(hTimeSlices->GetXaxis()->GetBinLowEdge(1)+20.0,0.85*hTimeSlices->GetMaximum(),Form("depth=%d",depth));
+
       //      t->DrawLatex(0.,0.75*hTimeSlices->GetMaximum(),Form("M0=%4.2f",Method0Energy));
       //      t->DrawLatex(0.15,0.65*hTimeSlices->GetMaximum(),Form("M2=%4.2f",Method2Energy));
 
