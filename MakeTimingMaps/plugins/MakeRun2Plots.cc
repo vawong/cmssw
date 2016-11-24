@@ -89,6 +89,8 @@ class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       double RecHitEnergyM0;
       double RecHitTimeM0;
 
+      double RecHitEnergyMHI;
+
       double Method0EnergyM3;
       double RecHitEnergyM3;
       double RecHitTimeM3;
@@ -106,27 +108,47 @@ class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       edm::EDGetTokenT<HBHERecHitCollection>    hRhTokenM2;
       edm::EDGetTokenT<HBHERecHitCollection>    hRhTokenM3;
       edm::EDGetTokenT<HBHERecHitCollection>    hRhTokenM0;
+      edm::EDGetTokenT<HBHERecHitCollection>    hRhTokenMAHI;
+
       edm::EDGetTokenT<HORecHitCollection>    hOToken;
+
+      edm::EDGetTokenT<std::vector<PCaloHit>>   hSHitToken;
+
 
       TH1F *hCheckTimingM2;
       TH1F *hCheckTimingM2_gt5;
       TH1F *hCheckEnergyM2;
       TH1F *hCheckChi2M2_gt5;
+      TH2F *hChi2Energy_barrel;
+      TH2F *hChi2Energy_endcap;
 
       TH1F *hCheckTimingM3;
       TH1F *hCheckEnergyM3;
 
       TH1F *hCheckTimingM0;
       TH1F *hCheckEnergyM0;
+
+      TH1F *hCheckEnergyMAHI;
     
       TH1F *hCheckTimingHO;
 
-      TH2F *hCheckEnergyM2M3;
+      TH2F *hCheckEnergyM2M0;
+      TH2F *hCheckEnergyM2MAHI;
+      TH2F *hCheckEnergySIMHITMAHI;
+      TH2F *hCheckEnergySIMHITM2;
+
+      TH1F *hCheckMAHIPull_HB;
+      TH1F *hCheckMAHIPull_HE;
+      TH1F *hCheckM2Pull_HB;
+      TH1F *hCheckM2Pull_HE;
 
       TProfile2D *hHBHEChi2;
       TProfile2D *hHBHEChi2_depth1;
       TProfile2D *hHBHEChi2_depth2;
       TProfile2D *hHBHEChi2_depth3;
+
+  HcalSimParameterMap simParameterMap_;
+
 };
 
 
@@ -139,8 +161,11 @@ MakeRun2Plots::MakeRun2Plots(const edm::ParameterSet& iConfig)
   hRhTokenM2 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbhereco"));
   hRhTokenM3 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoM3"));
   hRhTokenM0 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoM0"));
+  hRhTokenMAHI = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoMAHI"));
 
   hOToken = consumes<HORecHitCollection >(iConfig.getUntrackedParameter<string>("HORecHits","horeco"));
+
+  hSHitToken = consumes<edm::PCaloHitContainer>(edm::InputTag("g4SimHits","HcalHits"));
 
   // example histogram for storing time slice information
   /*
@@ -166,7 +191,8 @@ MakeRun2Plots::MakeRun2Plots(const edm::ParameterSet& iConfig)
   hCheckChi2M2_gt5 = FileService->make<TH1F>("Chi2M2_gt5","Chi2M2_gt5",1000,-10,500);
   hCheckChi2M2_gt5->GetXaxis()->SetTitle("M2 chi2");
 
-  /////
+
+  ///// various chi2 plots for M2
 
   hHBHEChi2 = FileService->make<TProfile2D>("hHBHEChi2","hHBHEChi2",59,-29.5,29.5,72,0.5,72.5, 0, 500.,"s");
   hHBHEChi2->GetXaxis()->SetTitle("#eta");
@@ -188,6 +214,14 @@ MakeRun2Plots::MakeRun2Plots(const edm::ParameterSet& iConfig)
   hHBHEChi2_depth3->GetYaxis()->SetTitle("#phi");
   hHBHEChi2_depth3->GetZaxis()->SetTitle("M2 chi2");
 
+  hChi2Energy_barrel = FileService->make<TH2F>("hChi2Energy_barrel","hChi2Energy_barrel",100,0.,500.,100,-2, 5.);
+  hChi2Energy_endcap = FileService->make<TH2F>("hChi2Energy_endcap","hChi2Energy_endcap",100,0.,500.,100,-2, 5.);
+  hChi2Energy_barrel->GetXaxis()->SetTitle("M2 energy");
+  hChi2Energy_barrel->GetYaxis()->SetTitle("log10 (M2 chi2)");
+  hChi2Energy_endcap->GetXaxis()->SetTitle("M2 energy");
+  hChi2Energy_endcap->GetYaxis()->SetTitle("log10 (M2 chi2)");
+
+
   /////
 
   hCheckTimingM0 = FileService->make<TH1F>("TimingM0","TimingM0",25,-12.5,12.5);
@@ -197,10 +231,39 @@ MakeRun2Plots::MakeRun2Plots(const edm::ParameterSet& iConfig)
   hCheckEnergyM3 = FileService->make<TH1F>("EnergyM3","EnergyM3",20,0.,100.);
   hCheckEnergyM3->GetXaxis()->SetTitle("M3 Energy");
 
-  hCheckEnergyM2M3 = FileService->make<TH2F>("EnergyM2M3","EnergyM2M3",20,0.,100.,20,0.,100.);
-  hCheckEnergyM2M3->GetXaxis()->SetTitle("M2 Energy");
-  hCheckEnergyM2M3->GetXaxis()->SetTitle("M3 Energy");
+  hCheckEnergyMAHI = FileService->make<TH1F>("EnergyMAHI","EnergyMAHI",20,0.,100.);
+  hCheckEnergyMAHI->GetXaxis()->SetTitle("MAHI Energy");
 
+  /////
+
+  hCheckEnergyM2M0 = FileService->make<TH2F>("EnergyM2M0","EnergyM2M0",20,0.,100.,20,0.,100.);
+  hCheckEnergyM2M0->GetYaxis()->SetTitle("M2 Energy");
+  hCheckEnergyM2M0->GetXaxis()->SetTitle("M0 Energy");
+
+  hCheckEnergyM2MAHI = FileService->make<TH2F>("EnergyM2MAHI","EnergyM2MAHI",20,0.,100.,20,0.,100.);
+  hCheckEnergyM2MAHI->GetXaxis()->SetTitle("M2 Energy");
+  hCheckEnergyM2MAHI->GetYaxis()->SetTitle("MAHI Energy");
+
+  hCheckEnergySIMHITMAHI = FileService->make<TH2F>("EnergySIMHITMAHI","EnergySIMHITMAHI",20,0.,100.,20,0.,100.);
+  hCheckEnergySIMHITMAHI->GetXaxis()->SetTitle("SIMHIT Energy");
+  hCheckEnergySIMHITMAHI->GetYaxis()->SetTitle("MAHI Energy");
+
+  hCheckEnergySIMHITM2 = FileService->make<TH2F>("EnergySIMHITM2","EnergySIMHITM2",20,0.,100.,20,0.,100.);
+  hCheckEnergySIMHITM2->GetXaxis()->SetTitle("SIMHIT Energy");
+  hCheckEnergySIMHITM2->GetYaxis()->SetTitle("M2 Energy");
+
+  /////
+  /////
+
+  hCheckMAHIPull_HB = FileService->make<TH1F>("PullMAHI_HB","PullMAHI_HB",200,-2,2.);
+  hCheckMAHIPull_HB->GetXaxis()->SetTitle("(MAHI-Sim)/Sim");
+  hCheckMAHIPull_HE = FileService->make<TH1F>("PullMAHI_HE","PullMAHI_HE",200,-2,2.);
+  hCheckMAHIPull_HE->GetXaxis()->SetTitle("(MAHI-Sim)/Sim");
+
+  hCheckM2Pull_HB = FileService->make<TH1F>("PullM2_HB","PullM2_HB",200,-2,2.);
+  hCheckM2Pull_HB->GetXaxis()->SetTitle("(M2-Sim)/Sim");
+  hCheckM2Pull_HE = FileService->make<TH1F>("PullM2_HE","PullM2_HE",200,-2,2.);
+  hCheckM2Pull_HE->GetXaxis()->SetTitle("(M2-Sim)/Sim");
 
 }
 
@@ -223,8 +286,14 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   Handle<HBHERecHitCollection> hRecHitsM0; // create handle
   iEvent.getByToken(hRhTokenM0, hRecHitsM0); // get events based on token
 
+  Handle<HBHERecHitCollection> hRecHitsMAHI; // create handle
+  iEvent.getByToken(hRhTokenMAHI, hRecHitsMAHI); // get events based on token
+
   Handle<HORecHitCollection> hRecHitsHO; // create handle
   iEvent.getByToken(hOToken, hRecHitsHO); // get events based on token
+
+  Handle<PCaloHitContainer> hSimHits;      // create handle
+  iEvent.getByToken(hSHitToken, hSimHits);   // SimHits
 
   RunNumber = iEvent.id().run(); // get the run number for the event
   EvtNumber = iEvent.id().event(); // get the event number
@@ -252,6 +321,7 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     RecHitTime = (*hRecHits)[i].time();
     RecHitChi2 = (*hRecHits)[i].chi2();
 
+    hCheckEnergyM2M0->Fill(RecHitEnergy,Method0Energy);
     hCheckEnergyM2->Fill(RecHitEnergy);
     hCheckTimingM2->Fill(RecHitTime);
     if(Method0Energy>5) hCheckTimingM2_gt5->Fill(RecHitTime);
@@ -261,6 +331,34 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     if(Method0Energy>5 && depth==1) hHBHEChi2_depth1->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
     if(Method0Energy>5 && depth==2) hHBHEChi2_depth2->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
     if(Method0Energy>5 && depth==3) hHBHEChi2_depth3->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
+
+    if(std::abs(detID_rh.ieta()) < 15 )  hChi2Energy_barrel->Fill(RecHitEnergy,log10(RecHitChi2));
+    if(std::abs(detID_rh.ieta()) > 17 )  hChi2Energy_endcap->Fill(RecHitEnergy,log10(RecHitChi2));
+
+    //$$$$$$$$$$$$$$$
+    /// CORRELATION WITH SIMHITS
+    //$$$$$$$$$$$$$$$
+
+    double SamplingFactor = 1;
+    if(detID_rh.subdet() == HcalBarrel) {
+      SamplingFactor = simParameterMap_.hbParameters().samplingFactor(detID_rh);
+    } else if (detID_rh.subdet() == HcalEndcap) {
+      SamplingFactor = simParameterMap_.heParameters().samplingFactor(detID_rh);
+    }
+
+    double SHitEn=0;
+    for (int j=0; j < (int) hSimHits->size(); j++) {
+      // check that the SimHits are in the same channel as the rechit
+      if ((HcalDetId)(*hSimHits)[j].id() == detID_rh && (*hSimHits)[j].time() > 0 && (*hSimHits)[j].time() < 40)
+	SHitEn += SamplingFactor*((*hSimHits)[j].energy());
+    }
+
+    //    cout << "SHitEn = " << SHitEn << endl;
+
+    hCheckEnergySIMHITM2->Fill(SHitEn,(*hRecHits)[i].energy());
+    if(SHitEn>0 && std::abs(detID_rh.ieta())<15) hCheckM2Pull_HB->Fill(((*hRecHits)[i].energy()-SHitEn)/SHitEn);
+    if(SHitEn>0 && std::abs(detID_rh.ieta())>17) hCheckM2Pull_HE->Fill(((*hRecHits)[i].energy()-SHitEn)/SHitEn);
+
 
   } // recHit
 
@@ -272,7 +370,7 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   // Loop over all rechits in one event
   for(int i = 0; i < (int)hRecHitsM0->size(); i++) {
     //    ClearVariables(); // sets a bunch of stuff to zero
-    
+
     // Just in case the file you are running over contains events from multiple runs,
     // remove everything except the run you are interested in
     //  if(RunNumber != runNumber_) continue;
@@ -299,7 +397,7 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   // Loop over all rechits in one event
   for(int i = 0; i < (int)hRecHitsM3->size(); i++) {
     //    ClearVariables(); // sets a bunch of stuff to zero
-    
+
     // Just in case the file you are running over contains events from multiple runs,
     // remove everything except the run you are interested in
     //  if(RunNumber != runNumber_) continue;
@@ -327,7 +425,7 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   // Loop over all rechits in one event
   for(int i = 0; i < (int)hRecHitsHO->size(); i++) {
     //    ClearVariables(); // sets a bunch of stuff to zero
-    
+
     // Just in case the file you are running over contains events from multiple runs,
     // remove everything except the run you are interested in
     //  if(RunNumber != runNumber_) continue;
@@ -348,6 +446,63 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     hCheckTimingHO->Fill((*hRecHitsHO)[i].time());
 
   } // recHitM0
+
+
+  //////////////////////
+  //////////////////////
+  //////////////////////  //////////////////////
+  //////////////////////
+  //////////////////////
+  //////////////////////
+
+
+  // Loop over all rechits
+  for(int i = 0; i < (int)hRecHitsMAHI->size(); i++) {
+
+    double SHitEn=0;
+
+    // get ID information for the reconstructed hit
+    HcalDetId detID_rh_MAHI = (*hRecHitsMAHI)[i].id().rawId();
+
+    hCheckEnergyMAHI->Fill((*hRecHitsMAHI)[i].energy());
+
+    //$$$$$$$$$$$$$$$
+    /// CORRELATION WITH M2
+    //$$$$$$$$$$$$$$$
+
+    // Loop over all rechits in one event
+    for(int i = 0; i < (int)hRecHits->size(); i++) {
+
+      HcalDetId detID_rh_M2 = (*hRecHitsMAHI)[i].id().rawId();
+      if(detID_rh_MAHI==detID_rh_M2) hCheckEnergyM2MAHI->Fill((*hRecHitsMAHI)[i].energy(),(*hRecHits)[i].energy());
+
+    } // end M2
+
+    //$$$$$$$$$$$$$$$
+    /// CORRELATION WITH SIMHITS
+    //$$$$$$$$$$$$$$$
+
+    double SamplingFactor = 1;
+    if(detID_rh_MAHI.subdet() == HcalBarrel) {
+      SamplingFactor = simParameterMap_.hbParameters().samplingFactor(detID_rh_MAHI);
+    } else if (detID_rh_MAHI.subdet() == HcalEndcap) {
+      SamplingFactor = simParameterMap_.heParameters().samplingFactor(detID_rh_MAHI);
+    }
+
+    for (int j=0; j < (int) hSimHits->size(); j++) {
+      // check that the SimHits are in the same channel as the rechit
+      if ((HcalDetId)(*hSimHits)[j].id() == detID_rh_MAHI && (*hSimHits)[j].time() > 0 && (*hSimHits)[j].time() < 40)
+	SHitEn += SamplingFactor*((*hSimHits)[j].energy());
+    }
+
+    //    cout << "SHitEn = " << SHitEn << endl;
+
+    hCheckEnergySIMHITMAHI->Fill(SHitEn,(*hRecHitsMAHI)[i].energy());
+    if(SHitEn>0 && std::abs(detID_rh_MAHI.ieta())<15) hCheckMAHIPull_HB->Fill(((*hRecHitsMAHI)[i].energy()-SHitEn)/SHitEn);
+    if(SHitEn>0 && std::abs(detID_rh_MAHI.ieta())>17) hCheckMAHIPull_HE->Fill(((*hRecHitsMAHI)[i].energy()-SHitEn)/SHitEn);
+
+
+  } // recHit MAHI
 
 
 
