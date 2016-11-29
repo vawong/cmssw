@@ -7,7 +7,7 @@ import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
 
-process = cms.Process('HLT',eras.Run2_2017)
+process = cms.Process('HLT3',eras.Run2_2017)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -15,7 +15,7 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-process.load('Configuration.Geometry.GeometryExtended2017devReco_cff')
+process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.RawToDigi_cff')
 process.load('Configuration.StandardSequences.L1Reco_cff')
@@ -30,8 +30,8 @@ process.maxEvents = cms.untracked.PSet(
 
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('file:step2_pi500_2017_hcaldev.root'),
-    secondaryFileNames = cms.untracked.vstring()
+                            fileNames = cms.untracked.vstring('file:step2_pi1-100_2017_realistic.root'),
+                            secondaryFileNames = cms.untracked.vstring()
 )
 
 process.options = cms.untracked.PSet(
@@ -53,16 +53,21 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    fileName = cms.untracked.string('file:step3_pi500_2017_hcaldev.root'),
+    fileName = cms.untracked.string('file:step3_pi1-100_2017_realistic.root'),
     outputCommands = process.RECOSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
 
 # Additional output definition
+process.RECOSIMoutput.outputCommands.append( "keep *_g4SimHits*_*_*")
 
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
+##process.GlobalTag = GlobalTag(process.GlobalTag, '81X_upgrade2017_realistic_v25', '')
+
+# Save HBHEChannelInfo
+process.hbheprereco.saveInfos = cms.bool(True)
 
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
@@ -85,5 +90,17 @@ process=convertToUnscheduled(process)
 from FWCore.ParameterSet.Utilities import cleanUnscheduled
 process=cleanUnscheduled(process)
 
+##from SLHCUpgradeSimulations.Configuration.HCalCustoms import load_HcalHardcode
+##process = load_HcalHardcode(process)
+##process.es_hardcode.useHEUpgrade = cms.bool(True)
+##process.es_hardcode.useHFUpgrade = cms.bool(True)
+##process.es_hardcode.heUpgrade.darkCurrent = cms.double(0)
+##process.es_hardcode.SiPMCharacteristics[2].crosstalk = cms.double(0.0)
+##process.es_hardcode.SiPMCharacteristics[3].crosstalk = cms.double(0.0)
+##process.es_hardcode.toGet = cms.untracked.vstring('GainWidths','SiPMParameters','SiPMCharacteristics')
 
 # Customisation from command line
+
+dumpFile  = open("DumpRECO_Phase1_step3_GT.py", "w")
+dumpFile.write(process.dumpPython())
+dumpFile.close()
