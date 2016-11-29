@@ -60,6 +60,8 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
 
 # Additional output definition
 process.RECOSIMoutput.outputCommands.append( "keep *_g4SimHits*_*_*")
+process.RECOSIMoutput.outputCommands.append( "keep *_hbheprereco*_*_*")
+process.RECOSIMoutput.outputCommands.append( "keep HBHERecHits*_*_*_*")
 
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -69,10 +71,14 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '
 # Save HBHEChannelInfo
 process.hbheprereco.saveInfos = cms.bool(True)
 
+process.hbheprerecoM3 = process.hbheprereco.clone()
+process.hbheprerecoM3.algorithm.__setattr__('useM2',cms.bool(False))
+process.hbheprerecoM3.algorithm.__setattr__('useM3',cms.bool(True))
+
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
-process.reconstruction_step = cms.Path(process.reconstruction)
+process.reconstruction_step = cms.Path(process.reconstruction*process.hbheprerecoM3)
 process.eventinterpretaion_step = cms.Path(process.EIsequence)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
