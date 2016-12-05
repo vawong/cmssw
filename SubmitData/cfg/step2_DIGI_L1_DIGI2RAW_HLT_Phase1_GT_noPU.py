@@ -7,7 +7,7 @@ import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
 
-process = cms.Process('HLT',eras.Run2_2017_HCALdev)
+process = cms.Process('HLT',eras.Run2_2017)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -15,7 +15,8 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-process.load('Configuration.Geometry.GeometryExtended2017devReco_cff')
+####process.load('Configuration.Geometry.GeometryExtended2017devReco_cff')
+process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Digi_cff')
 process.load('Configuration.StandardSequences.SimL1Emulator_cff')
@@ -32,11 +33,7 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
     dropDescendantsOfDroppedBranches = cms.untracked.bool(False),
     fileNames = cms.untracked.vstring(
-#        'root://eoscms//eos/cms/store/cmst3/user/dalfonso/HCAL/step1_SinglePiE50HCAL.root'
-        'root://eoscms//eos/cms/store/cmst3/user/dalfonso/HCAL/step1_SinglePi_500GeV.root'
-#        'root://eoscms//eos/cms/store/cmst3/user/dalfonso/HCAL/step1_TTbar_13TeV.root'
-#        'root://eoscms//eos/cms/store/group/dpg_hcal/comm_hcal/RecoAlgos/SinglePion/LocalGen/Phase1/step1.root'
-#        'file:step1.root'
+        'root://eoscms//eos/cms/store/cmst3/user/dalfonso/HCAL/8_1_0_pre16/step1_piE1to100_2017_ev10k.root'
     ),
 
     inputCommands = cms.untracked.vstring('keep *', 
@@ -78,7 +75,7 @@ process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(10485760),
-    fileName = cms.untracked.string('file:step2_pi500_2017_hcaldev.root'),
+    fileName = cms.untracked.string('file:step2_pi1-100_2017_realistic.root'),
     outputCommands = process.FEVTDEBUGHLTEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
@@ -87,8 +84,15 @@ process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
 
 # Other statements
 process.mix.digitizers = cms.PSet(process.theDigitizersValid)
+
+## MARIA temporarily switch off the timeSlew and set the timePhase to the 0.5
+##process.mix.digitizers.hcal.doTimeSlew = cms.bool(False)
+##process.mix.digitizers.hcal.he.timePhase = cms.double(7.5)
+##process.mix.digitizers.hcal.hb.timePhase = cms.double(7.5)
+
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_hcaldev', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
+##process.GlobalTag = GlobalTag(process.GlobalTag, '81X_upgrade2017_realistic_v25', '')
 
 # Path and EndPath definitions
 process.digitisation_step = cms.Path(process.pdigi_valid)
@@ -114,6 +118,19 @@ from HLTrigger.Configuration.customizeHLTforMC import customizeHLTforFullSim
 #call to customisation function customizeHLTforFullSim imported from HLTrigger.Configuration.customizeHLTforMC
 process = customizeHLTforFullSim(process)
 
+##from SLHCUpgradeSimulations.Configuration.HCalCustoms import load_HcalHardcode
+##process = load_HcalHardcode(process)
+##process.es_hardcode.useHEUpgrade = cms.bool(True)
+##process.es_hardcode.useHFUpgrade = cms.bool(True)
+##process.es_hardcode.heUpgrade.darkCurrent = cms.double(0)
+##process.es_hardcode.SiPMCharacteristics[2].crosstalk = cms.double(0.0)
+##process.es_hardcode.SiPMCharacteristics[3].crosstalk = cms.double(0.0)
+##process.es_hardcode.toGet = cms.untracked.vstring('GainWidths','SiPMParameters','SiPMCharacteristics')
+
 # End of customisation functions
 
 # Customisation from command line
+
+dumpFile  = open("DumpRECO_Phase1_step2_GT.py", "w")
+dumpFile.write(process.dumpPython())
+dumpFile.close()
