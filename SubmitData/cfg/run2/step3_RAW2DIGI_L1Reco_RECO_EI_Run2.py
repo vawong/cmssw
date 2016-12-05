@@ -33,7 +33,7 @@ process.maxEvents = cms.untracked.PSet(
 
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('file:step2_pi500_2016run2_ev10k.root'),
+    fileNames = cms.untracked.vstring('root://eoscms//eos/cms//store/cmst3/user/dalfonso/HCAL/8_1_0_pre13/step2_pi500_2016run2_ev10k.root'),
     secondaryFileNames = cms.untracked.vstring()
 )
 
@@ -51,7 +51,21 @@ process.configurationMetadata = cms.untracked.PSet(
 process.hbhereco = process.hbheprereco.clone()
 process.hbherecoM3 = process.hbheprereco.clone()
 process.hbherecoM0 = process.hbheprereco.clone()
-process.hbherecoMAHI = process.hbheprereco.clone()
+process.hbherecoMAHIcsv = process.hbheprereco.clone()
+process.hbherecoMAHIlagcsv = process.hbheprereco.clone()
+
+#Method 2
+process.hbhereco.applyTimeConstraint = cms.bool(False)
+process.hbhereco.applyPedConstraint = cms.bool(False)
+process.hbhereco.timeSigma = cms.double(2.5)   #ns
+##process.hbhereco.applyTimeSlew = cms.bool(False)
+
+# Method 2 collection
+process.hbherecoM2csv = process.hbheprereco.clone()
+process.hbherecoM2csv.pulseShapeType = cms.int32(2)
+
+process.hbherecoM2lagcsv = process.hbheprereco.clone()
+process.hbherecoM2lagcsv.pulseShapeType = cms.int32(2)
 
 # Method 3 collection
 process.hbherecoM3.puCorrMethod = cms.int32(3)
@@ -60,14 +74,18 @@ process.hbherecoM3.puCorrMethod = cms.int32(3)
 process.hbherecoM0.puCorrMethod = cms.int32(0)
 
 # MAHI 0 collection
-process.hbherecoMAHI.puCorrMethod = cms.int32(10)
+process.hbherecoMAHIcsv.puCorrMethod = cms.int32(10)
+process.hbherecoMAHIcsv.pulseShapeType = cms.int32(2)
+
+# MAHI 0 collection
+process.hbherecoMAHIlagcsv.puCorrMethod = cms.int32(10)
+process.hbherecoMAHIlagcsv.pulseShapeType = cms.int32(3)
 
 # Set Method 2 to use a single pulse fit
 #process.hbhereco.puCorrMethod = cms.int32(2)
 #process.hbhereco.ts4chi2 = cms.double(99999.)
 #process.hbhereco.timeMin = cms.double(-100.)
 #process.hbhereco.timeMax = cms.double(100.)
-#process.hbhereco.applyTimeConstraint = cms.bool(False)
 
 # Output definition
 
@@ -77,7 +95,7 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    fileName = cms.untracked.string('file:step3_pi500_2016run2_ev10k.root'),
+    fileName = cms.untracked.string('file:../step3_pi500_2016run2_ev10k_pulse105Standard.root'),
     outputCommands = process.RECOSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
@@ -96,7 +114,8 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
-process.reconstruction_step = cms.Path(process.reconstruction* process.hbherecoM3 * process.hbherecoM0 * process.hbherecoMAHI)
+process.reconstruction_step = cms.Path(process.reconstruction* process.hbherecoM2csv* process.hbherecoM2lagcsv * process.hbherecoM3 * process.hbherecoM0 * process.hbherecoMAHIcsv * process.hbherecoMAHIlagcsv )
+##process.reconstruction_step = cms.Path(process.reconstruction)
 process.eventinterpretaion_step = cms.Path(process.EIsequence)
 
 process.endjob_step = cms.EndPath(process.endOfProcess)
@@ -129,6 +148,6 @@ from Validation.Performance.TimeMemoryInfo import customise
 
 # Customisation from command line
 
-#dumpFile  = open("../DumpRECO_RUN2.py", "w")
-#dumpFile.write(process.dumpPython())
-#dumpFile.close()
+dumpFile  = open("../DumpRECO_RUN2.py", "w")
+dumpFile.write(process.dumpPython())
+dumpFile.close()
