@@ -25,7 +25,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(10)
 )
 
 # Input Added Timing Monitoring
@@ -33,7 +33,8 @@ process.maxEvents = cms.untracked.PSet(
 
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('root://eoscms//eos/cms//store/cmst3/user/dalfonso/HCAL/8_1_0_pre13/step2_pi500_2016run2_ev10k.root'),
+    #fileNames = cms.untracked.vstring('root://eoscms//eos/cms//store/cmst3/user/dalfonso/HCAL/8_1_0_pre13/step2_pi500_2016run2_ev10k.root'),
+    fileNames = cms.untracked.vstring('file:/afs/cern.ch/work/q/qnguyen/public/PulseShape/CMSSW_8_1_0_pre13_MAHI/src/MCGenerator/step2.root'),
     secondaryFileNames = cms.untracked.vstring()
 )
 
@@ -48,36 +49,39 @@ process.configurationMetadata = cms.untracked.PSet(
     version = cms.untracked.string('$Revision: 1.19 $')
 )
 
-process.hbhereco = process.hbheprereco.clone()
-process.hbherecoM3 = process.hbheprereco.clone()
-process.hbherecoM0 = process.hbheprereco.clone()
-process.hbherecoMAHIcsv = process.hbheprereco.clone()
-process.hbherecoMAHIlagcsv = process.hbheprereco.clone()
+#process.hbherecoM0 = process.hbheprereco.clone()
 
 #Method 2
+process.hbhereco = process.hbheprereco.clone()
 process.hbhereco.applyTimeConstraint = cms.bool(False)
 process.hbhereco.applyPedConstraint = cms.bool(False)
 process.hbhereco.timeSigma = cms.double(2.5)   #ns
+process.hbhereco.puCorrMethod = cms.int32(2)
+process.hbhereco.pulseShapeType = cms.int32(1)
 ##process.hbhereco.applyTimeSlew = cms.bool(False)
 
 # Method 2 collection
 process.hbherecoM2csv = process.hbheprereco.clone()
+process.hbherecoM2csv.puCorrMethod = cms.int32(2)
 process.hbherecoM2csv.pulseShapeType = cms.int32(2)
-
 process.hbherecoM2lagcsv = process.hbheprereco.clone()
-process.hbherecoM2lagcsv.pulseShapeType = cms.int32(2)
+process.hbherecoM2lagcsv.puCorrMethod = cms.int32(2)
+process.hbherecoM2lagcsv.pulseShapeType = cms.int32(3)
 
 # Method 3 collection
+process.hbherecoM3 = process.hbheprereco.clone()
 process.hbherecoM3.puCorrMethod = cms.int32(3)
 
 # Method 0 collection
-process.hbherecoM0.puCorrMethod = cms.int32(0)
+#process.hbherecoM0.puCorrMethod = cms.int32(0)
 
 # MAHI 0 collection
+process.hbherecoMAHIcsv = process.hbheprereco.clone()
 process.hbherecoMAHIcsv.puCorrMethod = cms.int32(10)
 process.hbherecoMAHIcsv.pulseShapeType = cms.int32(2)
 
 # MAHI 0 collection
+process.hbherecoMAHIlagcsv = process.hbheprereco.clone()
 process.hbherecoMAHIlagcsv.puCorrMethod = cms.int32(10)
 process.hbherecoMAHIlagcsv.pulseShapeType = cms.int32(3)
 
@@ -95,7 +99,7 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    fileName = cms.untracked.string('file:../step3_pi500_2016run2_ev10k_pulse105Standard.root'),
+    fileName = cms.untracked.string('file:../step3.root'),
     outputCommands = process.RECOSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
@@ -114,7 +118,8 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
-process.reconstruction_step = cms.Path(process.reconstruction* process.hbherecoM2csv* process.hbherecoM2lagcsv * process.hbherecoM3 * process.hbherecoM0 * process.hbherecoMAHIcsv * process.hbherecoMAHIlagcsv )
+#process.reconstruction_step = cms.Path(process.reconstruction* process.hbherecoM2csv* process.hbherecoM2lagcsv * process.hbherecoM3 * process.hbherecoM0 * process.hbherecoMAHIcsv * process.hbherecoMAHIlagcsv )
+process.reconstruction_step = cms.Path(process.reconstruction* process.hbherecoM2csv* process.hbherecoM2lagcsv * process.hbherecoM3 * process.hbherecoMAHIcsv * process.hbherecoMAHIlagcsv )
 ##process.reconstruction_step = cms.Path(process.reconstruction)
 process.eventinterpretaion_step = cms.Path(process.EIsequence)
 
@@ -140,7 +145,13 @@ process=cleanUnscheduled(process)
 # Automatic addition of the customisation function from Validation.Performance.TimeMemoryInfo
 from Validation.Performance.TimeMemoryInfo import customise
 
+#call to customisation function customise imported from Validation.Performance.TimeMemoryInfo
+#process = customise(process)
+
 # Automatic addition of the customisation function from PhysicsTools.PatAlgos.slimming.miniAOD_tools
+
+# Reduce printing delay
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 #call to customisation function miniAOD_customizeAllMC imported from PhysicsTools.PatAlgos.slimming.miniAOD_tools
 
