@@ -90,7 +90,9 @@ class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       double RecHitEnergyM0;
       double RecHitTimeM0;
 
-      double RecHitEnergyMHI;
+      double RecHitEnergyMAHI;
+      double RecHitEnergyM2csv;
+      double RecHitEnergyM2csvlag;
 
       double Method0EnergyM3;
       double RecHitEnergyM3;
@@ -107,7 +109,8 @@ class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       edm::Service<TFileService> FileService;
       // create the token to retrieve hit information
       edm::EDGetTokenT<HBHERecHitCollection>    hRhTokenM2;
-      edm::EDGetTokenT<HBHERecHitCollection>    hRhTokenM2csv;
+      edm::EDGetTokenT<HBHERecHitCollection>    hRhTokenM2csv105;
+      edm::EDGetTokenT<HBHERecHitCollection>    hRhTokenM2csvlag;
       edm::EDGetTokenT<HBHERecHitCollection>    hRhTokenM3;
       edm::EDGetTokenT<HBHERecHitCollection>    hRhTokenM0;
       edm::EDGetTokenT<HBHERecHitCollection>    hRhTokenMAHI;
@@ -131,6 +134,8 @@ class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       TH1F *hCheckEnergyM0;
 
       TH1F *hCheckEnergyMAHI;
+      TH1F *hCheckEnergyM2csv105;
+      TH1F *hCheckEnergyM2csvlag;
     
       TH1F *hCheckTimingHO;
 
@@ -149,7 +154,14 @@ class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       TProfile2D *hHBHEChi2_depth2;
       TProfile2D *hHBHEChi2_depth3;
 
-      TH2F* hCheckEnergyDiff_timing;
+      TH2F* hCheckEnergyM2M2csv105_timing;
+      TH2F* hCheckEnergyM2M2csv105_M2;
+      TH2F* hCheckEnergyM2M2csvlag_timing;
+      TH2F* hCheckEnergyM2M2csvlag_M2;
+      TH2F* hCheckEnergyM2csvlagMAHIcsvlag_timing;
+      TH2F* hCheckEnergyM2csvlagMAHIcsvlag_M2;
+
+
 
   HcalSimParameterMap simParameterMap_;
 
@@ -163,10 +175,11 @@ MakeRun2Plots::MakeRun2Plots(const edm::ParameterSet& iConfig)
   
   // Tell which collection is consumed
   hRhTokenM2 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbhereco"));
-  hRhTokenM2csv = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoM2csv"));
+  hRhTokenM2csv105 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoM2csv"));
+  hRhTokenM2csvlag = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoM2lagcsv"));
   hRhTokenM3 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoM3"));
   hRhTokenM0 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoM0"));
-  hRhTokenMAHI = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoMAHIcsv"));
+  hRhTokenMAHI = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoMAHIlagcsv"));
 
   hOToken = consumes<HORecHitCollection >(iConfig.getUntrackedParameter<string>("HORecHits","horeco"));
 
@@ -239,8 +252,21 @@ MakeRun2Plots::MakeRun2Plots(const edm::ParameterSet& iConfig)
   hCheckEnergyMAHI = FileService->make<TH1F>("EnergyMAHI","EnergyMAHI",20,0.,100.);
   hCheckEnergyMAHI->GetXaxis()->SetTitle("MAHI Energy");
 
+  hCheckEnergyM2csvlag = FileService->make<TH1F>("EnergyM2csvlag","EnergyM2csvlag",20,0.,100.);
+  hCheckEnergyM2csvlag->GetXaxis()->SetTitle("M2csvlag Energy");
+
+  hCheckEnergyM2csv105 = FileService->make<TH1F>("EnergyM2csv105","EnergyM2csv105",20,0.,100.);
+  hCheckEnergyM2csv105->GetXaxis()->SetTitle("M2csv Energy");
+
   /////
-  hCheckEnergyDiff_timing = FileService->make<TH2F>("CheckEnergyDiff_timing",";M2-M2_{csv};M2 Timing",100,-0.01,0.01,26,-1,25);
+  hCheckEnergyM2M2csv105_timing = FileService->make<TH2F>("CheckEnergyM2M2csv105_timing",";M2-M2_{csv105};M2 Timing",200,-2.,2.,26,-12.5,12.5);
+  hCheckEnergyM2M2csv105_M2 = FileService->make<TH2F>("CheckEnergyM2M2csv105_M2",";M2-M2_{csv105};M2 Energy (GeV)",200,-2.,2.,100,0,100.);
+
+  hCheckEnergyM2M2csvlag_timing = FileService->make<TH2F>("CheckEnergyM2M2csvlag_timing",";M2-M2_{csvlag};M2 Timing",200,-2.,2.,26,-12.5,12.5);
+  hCheckEnergyM2M2csvlag_M2 = FileService->make<TH2F>("CheckEnergyM2M2csvlag_M2",";M2-M2_{csvlag};M2 Energy (GeV)",200,-2.,2.,100,0,100.);
+
+  hCheckEnergyM2csvlagMAHIcsvlag_timing = FileService->make<TH2F>("CheckEnergyM2csvlagMAHIcsvlag_timing",";M2_{csvlag}-MAHI_{csvlag};M2 Timing",200,-2.,2.,26,-12.5,12.5);
+  hCheckEnergyM2csvlagMAHIcsvlag_M2 = FileService->make<TH2F>("CheckEnergyM2csvlagMAHIcsvlag_M2",";M2_{csvlag}-MAHI_{csvlag};M2 Energy (GeV)",200,-2.,2.,100,0,100.);
 
   hCheckEnergyM2M0 = FileService->make<TH2F>("EnergyM2M0","EnergyM2M0",20,0.,100.,20,0.,100.);
   hCheckEnergyM2M0->GetYaxis()->SetTitle("M2 Energy");
@@ -286,14 +312,17 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   Handle<HBHERecHitCollection> hRecHits; // create handle
   iEvent.getByToken(hRhTokenM2, hRecHits); // get events based on token
 
-  Handle<HBHERecHitCollection> hRecHitsM2csv; // create handle
-  iEvent.getByToken(hRhTokenM2csv, hRecHitsM2csv); // get events based on token
+  Handle<HBHERecHitCollection> hRecHitsM2csv105; // create handle
+  iEvent.getByToken(hRhTokenM2csv105, hRecHitsM2csv105); // get events based on token
 
+  Handle<HBHERecHitCollection> hRecHitsM2csvlag; // create handle
+  iEvent.getByToken(hRhTokenM2csvlag, hRecHitsM2csvlag); // get events based on token
+  
   Handle<HBHERecHitCollection> hRecHitsM3; // create handle
   iEvent.getByToken(hRhTokenM3, hRecHitsM3); // get events based on token
 
-  Handle<HBHERecHitCollection> hRecHitsM0; // create handle
-  iEvent.getByToken(hRhTokenM0, hRecHitsM0); // get events based on token
+//  Handle<HBHERecHitCollection> hRecHitsM0; // create handle
+//  iEvent.getByToken(hRhTokenM0, hRecHitsM0); // get events based on token
 
   Handle<HBHERecHitCollection> hRecHitsMAHI; // create handle
   iEvent.getByToken(hRhTokenMAHI, hRecHitsMAHI); // get events based on token
@@ -327,7 +356,6 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     // get some variables
     Method0Energy = (*hRecHits)[i].eraw();
     RecHitEnergy = (*hRecHits)[i].energy();
-    RecHitEnergyCSV = (*hRecHitsM2csv)[i].energy();
     RecHitTime = (*hRecHits)[i].time();
     RecHitChi2 = (*hRecHits)[i].chi2();
 
@@ -336,7 +364,7 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     hCheckTimingM2->Fill(RecHitTime);
     if(Method0Energy>5) hCheckTimingM2_gt5->Fill(RecHitTime);
     if(Method0Energy>5) hCheckChi2M2_gt5->Fill(RecHitChi2);
-    if(Method0Energy>5) hCheckEnergyDiff_timing->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitTime);
+
     if(Method0Energy>5) hHBHEChi2->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
     if(Method0Energy>5 && depth==1) hHBHEChi2_depth1->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
     if(Method0Energy>5 && depth==2) hHBHEChi2_depth2->Fill(detID_rh.ieta(), detID_rh.iphi(), RecHitChi2);
@@ -369,40 +397,110 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     if(SHitEn>0 && std::abs(detID_rh.ieta())<15) hCheckM2Pull_HB->Fill(((*hRecHits)[i].energy()-SHitEn)/SHitEn);
     if(SHitEn>0 && std::abs(detID_rh.ieta())>17) hCheckM2Pull_HE->Fill(((*hRecHits)[i].energy()-SHitEn)/SHitEn);
 
-
   } // recHit
+ 
+  for(int i = 0; i < (int)hRecHitsM2csv105->size(); i++) 
+  {
+    RecHitEnergyM2csv = (*hRecHitsM2csv105)[i].energy();
+    hCheckEnergyM2csv105->Fill(RecHitEnergyM2csv);
+  }
 
+  for(int i = 0; i < (int)hRecHitsM2csvlag->size(); i++) 
+  {
+    RecHitEnergyM2csvlag = (*hRecHitsM2csvlag)[i].energy();
+    hCheckEnergyM2csvlag->Fill(RecHitEnergyM2csvlag);
+  }
+
+
+  for(int i = 0; i < (int)hRecHits->size(); i++) 
+  {
+    for(int j = 0; j < (int)hRecHitsM2csv105->size(); j++) 
+    {
+    // get ID information for the reconstructed hit
+    HcalDetId detID_rh = (*hRecHits)[i].id().rawId();
+    HcalDetId detID_rhcsv = (*hRecHitsM2csv105)[j].id().rawId();
+    
+    // ID information can get us detector coordinates
+    depth = (*hRecHits)[i].id().depth();
+    iEta = detID_rh.ieta();
+    iPhi = detID_rh.iphi();
+    
+    // get some variables
+    Method0Energy = (*hRecHits)[i].eraw();
+    RecHitEnergy = (*hRecHits)[i].energy();
+    RecHitEnergyCSV = (*hRecHitsM2csv105)[j].energy();
+    RecHitTime = (*hRecHits)[i].time();
+    if(Method0Energy>5 && detID_rh == detID_rhcsv) hCheckEnergyM2M2csv105_timing->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitTime);
+    if(Method0Energy>5 && detID_rh == detID_rhcsv) hCheckEnergyM2M2csv105_M2->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitEnergy);
+    }
+  }
+
+  for(int i = 0; i < (int)hRecHits->size(); i++) 
+  {
+    for(int j = 0; j < (int)hRecHitsM2csvlag->size(); j++) 
+    {
+    // get ID information for the reconstructed hit
+    HcalDetId detID_rh = (*hRecHits)[i].id().rawId();
+    HcalDetId detID_rhcsvlag = (*hRecHitsM2csvlag)[j].id().rawId();
+    
+    // get some variables
+    Method0Energy = (*hRecHits)[i].eraw();
+    RecHitEnergy = (*hRecHits)[i].energy();
+    RecHitEnergyCSV = (*hRecHitsM2csvlag)[j].energy();
+    RecHitTime = (*hRecHits)[i].time();
+    if(Method0Energy>5 && detID_rh == detID_rhcsvlag) hCheckEnergyM2M2csvlag_timing->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitTime);
+    if(Method0Energy>5 && detID_rh == detID_rhcsvlag) hCheckEnergyM2M2csvlag_M2->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitEnergy);
+    }
+  }
+
+  for(int i = 0; i < (int)hRecHitsM2csvlag->size(); i++) 
+  {
+    for(int j = 0; j < (int)hRecHitsMAHI->size(); j++) 
+    {
+    // get ID information for the reconstructed hit
+    HcalDetId detID_rh = (*hRecHitsM2csvlag)[i].id().rawId();
+    HcalDetId detID_rhcsv = (*hRecHitsMAHI)[j].id().rawId();
+    
+    // get some variables
+    Method0Energy = (*hRecHitsM2csvlag)[i].eraw();
+    RecHitEnergy = (*hRecHitsM2csvlag)[i].energy();
+    RecHitEnergyCSV = (*hRecHitsMAHI)[j].energy();
+    RecHitTime = (*hRecHitsM2csvlag)[i].time();
+    if(Method0Energy>5 && detID_rh == detID_rhcsv) hCheckEnergyM2csvlagMAHIcsvlag_timing->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitTime);
+    if(Method0Energy>5 && detID_rh == detID_rhcsv) hCheckEnergyM2csvlagMAHIcsvlag_M2->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitEnergy);
+    }
+  }
   ///////////
   /// $$$$
   /// $$$$
   ///
 
   // Loop over all rechits in one event
-  for(int i = 0; i < (int)hRecHitsM0->size(); i++) {
-    //    ClearVariables(); // sets a bunch of stuff to zero
-
-    // Just in case the file you are running over contains events from multiple runs,
-    // remove everything except the run you are interested in
-    //  if(RunNumber != runNumber_) continue;
-    
-    // get ID information for the reconstructed hit
-    HcalDetId detID_rh = (*hRecHitsM0)[i].id().rawId();
-    
-    // ID information can get us detector coordinates
-    depth = (*hRecHitsM0)[i].id().depth();
-    iEta = detID_rh.ieta();
-    iPhi = detID_rh.iphi();
-    
-    // get some variables
-    Method0EnergyM0 = (*hRecHitsM0)[i].eraw();
-    RecHitEnergyM0 = (*hRecHitsM0)[i].energy();
-    RecHitTimeM0 = (*hRecHitsM0)[i].time();
-
-    hCheckTimingM0->Fill(RecHitTime);
-    hCheckEnergyM0->Fill(RecHitEnergy);
-
-  } // recHitM0
-
+//  for(int i = 0; i < (int)hRecHitsM0->size(); i++) {
+//    //    ClearVariables(); // sets a bunch of stuff to zero
+//
+//    // Just in case the file you are running over contains events from multiple runs,
+//    // remove everything except the run you are interested in
+//    //  if(RunNumber != runNumber_) continue;
+//    
+//    // get ID information for the reconstructed hit
+//    HcalDetId detID_rh = (*hRecHitsM0)[i].id().rawId();
+//    
+//    // ID information can get us detector coordinates
+//    depth = (*hRecHitsM0)[i].id().depth();
+//    iEta = detID_rh.ieta();
+//    iPhi = detID_rh.iphi();
+//    
+//    // get some variables
+//    Method0EnergyM0 = (*hRecHitsM0)[i].eraw();
+//    RecHitEnergyM0 = (*hRecHitsM0)[i].energy();
+//    RecHitTimeM0 = (*hRecHitsM0)[i].time();
+//
+//    hCheckTimingM0->Fill(RecHitTime);
+//    hCheckEnergyM0->Fill(RecHitEnergy);
+//
+//  } // recHitM0
+//
 
   // Loop over all rechits in one event
   for(int i = 0; i < (int)hRecHitsM3->size(); i++) {
@@ -426,7 +524,7 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     RecHitTimeM3 = (*hRecHitsM3)[i].time();
 
     hCheckTimingM3->Fill(RecHitTime);
-    hCheckEnergyM3->Fill(RecHitEnergy);
+    hCheckEnergyM3->Fill(RecHitEnergyM3);
 
   } // recHit M3
 
