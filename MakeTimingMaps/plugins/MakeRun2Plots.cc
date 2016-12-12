@@ -123,6 +123,8 @@ class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       TH1F *hCheckTimingM2;
       TH1F *hCheckTimingM2_gt5;
       TH1F *hCheckEnergyM2;
+      TH1F *hCheckEnergyM2_HB;
+      TH1F *hCheckEnergyM2_HE;
       TH1F *hCheckChi2M2_gt5;
       TH2F *hChi2Energy_barrel;
       TH2F *hChi2Energy_endcap;
@@ -133,9 +135,13 @@ class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       TH1F *hCheckTimingM0;
       TH1F *hCheckEnergyM0;
 
-      TH1F *hCheckEnergyMAHI;
-      TH1F *hCheckEnergyM2csv105;
-      TH1F *hCheckEnergyM2csvlag;
+      TH1F *hCheckEnergyMAHI_HB;
+      TH1F *hCheckEnergyM2csv105_HB;
+      TH1F *hCheckEnergyM2csvlag_HB;
+    
+      TH1F *hCheckEnergyMAHI_HE;
+      TH1F *hCheckEnergyM2csv105_HE;
+      TH1F *hCheckEnergyM2csvlag_HE;
     
       TH1F *hCheckTimingHO;
 
@@ -154,12 +160,19 @@ class MakeRun2Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       TProfile2D *hHBHEChi2_depth2;
       TProfile2D *hHBHEChi2_depth3;
 
-      TH2F* hCheckEnergyM2M2csv105_timing;
-      TH2F* hCheckEnergyM2M2csv105_M2;
-      TH2F* hCheckEnergyM2M2csvlag_timing;
-      TH2F* hCheckEnergyM2M2csvlag_M2;
-      TH2F* hCheckEnergyM2csvlagMAHIcsvlag_timing;
-      TH2F* hCheckEnergyM2csvlagMAHIcsvlag_M2;
+      TH2F* hCheckEnergyM2M2csv105_timing_HB;
+      TH2F* hCheckEnergyM2M2csv105_M2_HB;
+      TH2F* hCheckEnergyM2M2csvlag_timing_HB;
+      TH2F* hCheckEnergyM2M2csvlag_M2_HB;
+      TH2F* hCheckEnergyM2csvlagMAHIcsvlag_timing_HB;
+      TH2F* hCheckEnergyM2csvlagMAHIcsvlag_M2_HB;
+
+      TH2F* hCheckEnergyM2M2csv105_timing_HE;
+      TH2F* hCheckEnergyM2M2csv105_M2_HE;
+      TH2F* hCheckEnergyM2M2csvlag_timing_HE;
+      TH2F* hCheckEnergyM2M2csvlag_M2_HE;
+      TH2F* hCheckEnergyM2csvlagMAHIcsvlag_timing_HE;
+      TH2F* hCheckEnergyM2csvlagMAHIcsvlag_M2_HE;
 
 
 
@@ -174,7 +187,7 @@ MakeRun2Plots::MakeRun2Plots(const edm::ParameterSet& iConfig)
   usesResource("TFileService");
   
   // Tell which collection is consumed
-  hRhTokenM2 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbhereco"));
+  hRhTokenM2 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoM2"));
   hRhTokenM2csv105 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoM2csv"));
   hRhTokenM2csvlag = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoM2lagcsv"));
   hRhTokenM3 = consumes<HBHERecHitCollection >(iConfig.getUntrackedParameter<string>("HBHERecHits","hbherecoM3"));
@@ -205,6 +218,10 @@ MakeRun2Plots::MakeRun2Plots(const edm::ParameterSet& iConfig)
 
   hCheckEnergyM2 = FileService->make<TH1F>("EnergyM2","EnergyM2",20,0.,100.);
   hCheckEnergyM2->GetXaxis()->SetTitle("M2 Energy");
+  hCheckEnergyM2_HB = FileService->make<TH1F>("EnergyM2_HB","EnergyM2_HB",20,0.,100.);
+  hCheckEnergyM2_HB->GetXaxis()->SetTitle("M2 Energy");
+  hCheckEnergyM2_HE = FileService->make<TH1F>("EnergyM2_HE","EnergyM2_HE",20,0.,100.);
+  hCheckEnergyM2_HE->GetXaxis()->SetTitle("M2 Energy");
 
   hCheckChi2M2_gt5 = FileService->make<TH1F>("Chi2M2_gt5","Chi2M2_gt5",1000,-10,500);
   hCheckChi2M2_gt5->GetXaxis()->SetTitle("M2 chi2");
@@ -249,24 +266,42 @@ MakeRun2Plots::MakeRun2Plots(const edm::ParameterSet& iConfig)
   hCheckEnergyM3 = FileService->make<TH1F>("EnergyM3","EnergyM3",20,0.,100.);
   hCheckEnergyM3->GetXaxis()->SetTitle("M3 Energy");
 
-  hCheckEnergyMAHI = FileService->make<TH1F>("EnergyMAHI","EnergyMAHI",20,0.,100.);
-  hCheckEnergyMAHI->GetXaxis()->SetTitle("MAHI Energy");
+  hCheckEnergyMAHI_HB = FileService->make<TH1F>("EnergyMAHI_HB","EnergyMAHI_HB",20,0.,100.);
+  hCheckEnergyMAHI_HB->GetXaxis()->SetTitle("MAHI Energy");
 
-  hCheckEnergyM2csvlag = FileService->make<TH1F>("EnergyM2csvlag","EnergyM2csvlag",20,0.,100.);
-  hCheckEnergyM2csvlag->GetXaxis()->SetTitle("M2csvlag Energy");
+  hCheckEnergyM2csvlag_HB = FileService->make<TH1F>("EnergyM2csvlag_HB","EnergyM2csvlag_HB",20,0.,100.);
+  hCheckEnergyM2csvlag_HB->GetXaxis()->SetTitle("M2csvlag Energy");
 
-  hCheckEnergyM2csv105 = FileService->make<TH1F>("EnergyM2csv105","EnergyM2csv105",20,0.,100.);
-  hCheckEnergyM2csv105->GetXaxis()->SetTitle("M2csv Energy");
+  hCheckEnergyM2csv105_HB = FileService->make<TH1F>("EnergyM2csv105_HB","EnergyM2csv105_HB",20,0.,100.);
+  hCheckEnergyM2csv105_HB->GetXaxis()->SetTitle("M2csv Energy");
+
+  hCheckEnergyMAHI_HE = FileService->make<TH1F>("EnergyMAHI_HE","EnergyMAHI_HE",20,0.,100.);
+  hCheckEnergyMAHI_HE->GetXaxis()->SetTitle("MAHI Energy");
+
+  hCheckEnergyM2csvlag_HE = FileService->make<TH1F>("EnergyM2csvlag_HE","EnergyM2csvlag_HE",20,0.,100.);
+  hCheckEnergyM2csvlag_HE->GetXaxis()->SetTitle("M2csvlag Energy");
+
+  hCheckEnergyM2csv105_HE = FileService->make<TH1F>("EnergyM2csv105_HE","EnergyM2csv105_HE",20,0.,100.);
+  hCheckEnergyM2csv105_HE->GetXaxis()->SetTitle("M2csv Energy");
 
   /////
-  hCheckEnergyM2M2csv105_timing = FileService->make<TH2F>("CheckEnergyM2M2csv105_timing",";M2-M2_{csv105};M2 Timing",200,-2.,2.,26,-12.5,12.5);
-  hCheckEnergyM2M2csv105_M2 = FileService->make<TH2F>("CheckEnergyM2M2csv105_M2",";M2-M2_{csv105};M2 Energy (GeV)",200,-2.,2.,100,0,100.);
+  hCheckEnergyM2M2csv105_timing_HB = FileService->make<TH2F>("CheckEnergyM2M2csv105_timing_HB",";M2-M2_{csv105};M2 Timing",200,-2.,2.,26,-12.5,12.5);
+  hCheckEnergyM2M2csv105_M2_HB = FileService->make<TH2F>("CheckEnergyM2M2csv105_M2_HB",";M2-M2_{csv105};M2 Energy (GeV)",200,-2.,2.,100,0,100.);
 
-  hCheckEnergyM2M2csvlag_timing = FileService->make<TH2F>("CheckEnergyM2M2csvlag_timing",";M2-M2_{csvlag};M2 Timing",200,-2.,2.,26,-12.5,12.5);
-  hCheckEnergyM2M2csvlag_M2 = FileService->make<TH2F>("CheckEnergyM2M2csvlag_M2",";M2-M2_{csvlag};M2 Energy (GeV)",200,-2.,2.,100,0,100.);
+  hCheckEnergyM2M2csvlag_timing_HB = FileService->make<TH2F>("CheckEnergyM2M2csvlag_timing_HB",";M2-M2_{csvlag};M2 Timing",200,-2.,2.,26,-12.5,12.5);
+  hCheckEnergyM2M2csvlag_M2_HB = FileService->make<TH2F>("CheckEnergyM2M2csvlag_M2_HB",";M2-M2_{csvlag};M2 Energy (GeV)",200,-2.,2.,100,0,100.);
 
-  hCheckEnergyM2csvlagMAHIcsvlag_timing = FileService->make<TH2F>("CheckEnergyM2csvlagMAHIcsvlag_timing",";M2_{csvlag}-MAHI_{csvlag};M2 Timing",200,-2.,2.,26,-12.5,12.5);
-  hCheckEnergyM2csvlagMAHIcsvlag_M2 = FileService->make<TH2F>("CheckEnergyM2csvlagMAHIcsvlag_M2",";M2_{csvlag}-MAHI_{csvlag};M2 Energy (GeV)",200,-2.,2.,100,0,100.);
+  hCheckEnergyM2csvlagMAHIcsvlag_timing_HB = FileService->make<TH2F>("CheckEnergyM2csvlagMAHIcsvlag_timing_HB",";M2_{csvlag}-MAHI_{csvlag};M2 Timing",200,-2.,2.,26,-12.5,12.5);
+  hCheckEnergyM2csvlagMAHIcsvlag_M2_HB = FileService->make<TH2F>("CheckEnergyM2csvlagMAHIcsvlag_M2_HB",";M2_{csvlag}-MAHI_{csvlag};M2 Energy (GeV)",200,-2.,2.,100,0,100.);
+
+  hCheckEnergyM2M2csv105_timing_HE = FileService->make<TH2F>("CheckEnergyM2M2csv105_timing_HE",";M2-M2_{csv105};M2 Timing",200,-2.,2.,26,-12.5,12.5);
+  hCheckEnergyM2M2csv105_M2_HE = FileService->make<TH2F>("CheckEnergyM2M2csv105_M2_HE",";M2-M2_{csv105};M2 Energy (GeV)",200,-2.,2.,100,0,100.);
+
+  hCheckEnergyM2M2csvlag_timing_HE = FileService->make<TH2F>("CheckEnergyM2M2csvlag_timing_HE",";M2-M2_{csvlag};M2 Timing",200,-2.,2.,26,-12.5,12.5);
+  hCheckEnergyM2M2csvlag_M2_HE = FileService->make<TH2F>("CheckEnergyM2M2csvlag_M2_HE",";M2-M2_{csvlag};M2 Energy (GeV)",200,-2.,2.,100,0,100.);
+
+  hCheckEnergyM2csvlagMAHIcsvlag_timing_HE = FileService->make<TH2F>("CheckEnergyM2csvlagMAHIcsvlag_timing_HE",";M2_{csvlag}-MAHI_{csvlag};M2 Timing",200,-2.,2.,26,-12.5,12.5);
+  hCheckEnergyM2csvlagMAHIcsvlag_M2_HE = FileService->make<TH2F>("CheckEnergyM2csvlagMAHIcsvlag_M2_HE",";M2_{csvlag}-MAHI_{csvlag};M2 Energy (GeV)",200,-2.,2.,100,0,100.);
 
   hCheckEnergyM2M0 = FileService->make<TH2F>("EnergyM2M0","EnergyM2M0",20,0.,100.,20,0.,100.);
   hCheckEnergyM2M0->GetYaxis()->SetTitle("M2 Energy");
@@ -372,6 +407,8 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
     if(std::abs(detID_rh.ieta()) < 15 )  hChi2Energy_barrel->Fill(RecHitEnergy,log10(RecHitChi2));
     if(std::abs(detID_rh.ieta()) > 17 )  hChi2Energy_endcap->Fill(RecHitEnergy,log10(RecHitChi2));
+    if(std::abs(detID_rh.ieta()) < 15 )  hCheckEnergyM2_HB->Fill(RecHitEnergy);
+    if(std::abs(detID_rh.ieta()) > 17 )  hCheckEnergyM2_HE->Fill(RecHitEnergy);
 
     //$$$$$$$$$$$$$$$
     /// CORRELATION WITH SIMHITS
@@ -401,14 +438,18 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
  
   for(int i = 0; i < (int)hRecHitsM2csv105->size(); i++) 
   {
+    HcalDetId detID_rh = (*hRecHitsM2csv105)[i].id().rawId();
     RecHitEnergyM2csv = (*hRecHitsM2csv105)[i].energy();
-    hCheckEnergyM2csv105->Fill(RecHitEnergyM2csv);
+    if (std::abs(detID_rh.ieta()) < 15) hCheckEnergyM2csv105_HB->Fill(RecHitEnergyM2csv);
+    if (std::abs(detID_rh.ieta()) > 17) hCheckEnergyM2csv105_HE->Fill(RecHitEnergyM2csv);
   }
 
   for(int i = 0; i < (int)hRecHitsM2csvlag->size(); i++) 
   {
+    HcalDetId detID_rh = (*hRecHitsM2csvlag)[i].id().rawId();
     RecHitEnergyM2csvlag = (*hRecHitsM2csvlag)[i].energy();
-    hCheckEnergyM2csvlag->Fill(RecHitEnergyM2csvlag);
+    if (std::abs(detID_rh.ieta()) < 15) hCheckEnergyM2csvlag_HB->Fill(RecHitEnergyM2csvlag);
+    if (std::abs(detID_rh.ieta()) > 17) hCheckEnergyM2csvlag_HE->Fill(RecHitEnergyM2csvlag);
   }
 
 
@@ -421,7 +462,6 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     HcalDetId detID_rhcsv = (*hRecHitsM2csv105)[j].id().rawId();
     
     // ID information can get us detector coordinates
-    depth = (*hRecHits)[i].id().depth();
     iEta = detID_rh.ieta();
     iPhi = detID_rh.iphi();
     
@@ -430,8 +470,10 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     RecHitEnergy = (*hRecHits)[i].energy();
     RecHitEnergyCSV = (*hRecHitsM2csv105)[j].energy();
     RecHitTime = (*hRecHits)[i].time();
-    if(Method0Energy>5 && detID_rh == detID_rhcsv) hCheckEnergyM2M2csv105_timing->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitTime);
-    if(Method0Energy>5 && detID_rh == detID_rhcsv) hCheckEnergyM2M2csv105_M2->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitEnergy);
+    if(Method0Energy>5 && detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckEnergyM2M2csv105_timing_HB->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitTime);
+    if(Method0Energy>5 && detID_rh == detID_rhcsv && std::abs(iEta) < 15 && std::abs(detID_rhcsv.ieta())<15) hCheckEnergyM2M2csv105_M2_HB->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitEnergy);
+    if(Method0Energy>5 && detID_rh == detID_rhcsv && std::abs(iEta) > 17 && std::abs(detID_rhcsv.ieta())>17) hCheckEnergyM2M2csv105_timing_HE->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitTime);
+    if(Method0Energy>5 && detID_rh == detID_rhcsv && std::abs(iEta) > 17 && std::abs(detID_rhcsv.ieta())>17) hCheckEnergyM2M2csv105_M2_HE->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitEnergy);
     }
   }
 
@@ -448,8 +490,10 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     RecHitEnergy = (*hRecHits)[i].energy();
     RecHitEnergyCSV = (*hRecHitsM2csvlag)[j].energy();
     RecHitTime = (*hRecHits)[i].time();
-    if(Method0Energy>5 && detID_rh == detID_rhcsvlag) hCheckEnergyM2M2csvlag_timing->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitTime);
-    if(Method0Energy>5 && detID_rh == detID_rhcsvlag) hCheckEnergyM2M2csvlag_M2->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitEnergy);
+    if(Method0Energy>5 && detID_rh == detID_rhcsvlag && std::abs(detID_rh.ieta())<15 && std::abs(detID_rhcsvlag.ieta())<15) hCheckEnergyM2M2csvlag_timing_HB->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitTime);
+    if(Method0Energy>5 && detID_rh == detID_rhcsvlag && std::abs(detID_rh.ieta())<15 && std::abs(detID_rhcsvlag.ieta())<15) hCheckEnergyM2M2csvlag_M2_HB->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitEnergy);
+    if(Method0Energy>5 && detID_rh == detID_rhcsvlag && std::abs(detID_rh.ieta())>17 && std::abs(detID_rhcsvlag.ieta())>17) hCheckEnergyM2M2csvlag_timing_HE->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitTime);
+    if(Method0Energy>5 && detID_rh == detID_rhcsvlag && std::abs(detID_rh.ieta())>17 && std::abs(detID_rhcsvlag.ieta())>17) hCheckEnergyM2M2csvlag_M2_HE->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitEnergy);
     }
   }
 
@@ -466,8 +510,10 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     RecHitEnergy = (*hRecHitsM2csvlag)[i].energy();
     RecHitEnergyCSV = (*hRecHitsMAHI)[j].energy();
     RecHitTime = (*hRecHitsM2csvlag)[i].time();
-    if(Method0Energy>5 && detID_rh == detID_rhcsv) hCheckEnergyM2csvlagMAHIcsvlag_timing->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitTime);
-    if(Method0Energy>5 && detID_rh == detID_rhcsv) hCheckEnergyM2csvlagMAHIcsvlag_M2->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitEnergy);
+    if(Method0Energy>5 && detID_rh == detID_rhcsv && std::abs(detID_rh.ieta())<15 && std::abs(detID_rhcsv.ieta())<15) hCheckEnergyM2csvlagMAHIcsvlag_timing_HB->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitTime);
+    if(Method0Energy>5 && detID_rh == detID_rhcsv && std::abs(detID_rh.ieta())<15 && std::abs(detID_rhcsv.ieta())<15) hCheckEnergyM2csvlagMAHIcsvlag_M2_HB->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitEnergy);
+    if(Method0Energy>5 && detID_rh == detID_rhcsv && std::abs(detID_rh.ieta())>17 && std::abs(detID_rhcsv.ieta())>17) hCheckEnergyM2csvlagMAHIcsvlag_timing_HE->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitTime);
+    if(Method0Energy>5 && detID_rh == detID_rhcsv && std::abs(detID_rh.ieta())>17 && std::abs(detID_rhcsv.ieta())>17) hCheckEnergyM2csvlagMAHIcsvlag_M2_HE->Fill(RecHitEnergy-RecHitEnergyCSV,RecHitEnergy);
     }
   }
   ///////////
@@ -572,7 +618,8 @@ MakeRun2Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     // get ID information for the reconstructed hit
     HcalDetId detID_rh_MAHI = (*hRecHitsMAHI)[i].id().rawId();
 
-    hCheckEnergyMAHI->Fill((*hRecHitsMAHI)[i].energy());
+    if (std::abs(detID_rh_MAHI.ieta()) < 15) hCheckEnergyMAHI_HB->Fill((*hRecHitsMAHI)[i].energy());
+    if (std::abs(detID_rh_MAHI.ieta()) > 17) hCheckEnergyMAHI_HE->Fill((*hRecHitsMAHI)[i].energy());
 
     //$$$$$$$$$$$$$$$
     /// CORRELATION WITH M2
