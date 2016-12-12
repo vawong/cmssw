@@ -25,7 +25,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(-1)
 )
 
 # Input Added Timing Monitoring
@@ -34,7 +34,7 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source("PoolSource",
     #fileNames = cms.untracked.vstring('root://eoscms//eos/cms//store/cmst3/user/dalfonso/HCAL/8_1_0_pre13/step2_pi500_2016run2_ev10k.root'),
-    fileNames = cms.untracked.vstring('file:/afs/cern.ch/work/q/qnguyen/public/PulseShape/CMSSW_8_1_0_pre13_MAHI/src/MCGenerator/step2.root'),
+    fileNames = cms.untracked.vstring('root://eoscms.cern.ch//store/group/dpg_hcal/comm_hcal/RecoAlgos/SinglePion/LocalGen/Run2/step2.root'),
     secondaryFileNames = cms.untracked.vstring()
 )
 
@@ -49,15 +49,14 @@ process.configurationMetadata = cms.untracked.PSet(
     version = cms.untracked.string('$Revision: 1.19 $')
 )
 
-#process.hbherecoM0 = process.hbheprereco.clone()
 
 #Method 2
-process.hbhereco = process.hbheprereco.clone()
-process.hbhereco.applyTimeConstraint = cms.bool(False)
-process.hbhereco.applyPedConstraint = cms.bool(False)
-process.hbhereco.timeSigma = cms.double(2.5)   #ns
-process.hbhereco.puCorrMethod = cms.int32(2)
-process.hbhereco.pulseShapeType = cms.int32(1)
+process.hbherecoM2 = process.hbheprereco.clone()
+#process.hbherecoM2.applyTimeConstraint = cms.bool(False)
+#process.hbherecoM2.applyPedConstraint = cms.bool(False)
+#process.hbherecoM2.timeSigma = cms.double(2.5)   #ns
+process.hbherecoM2.puCorrMethod = cms.int32(2)
+process.hbherecoM2.pulseShapeType = cms.int32(1)
 ##process.hbhereco.applyTimeSlew = cms.bool(False)
 
 # Method 2 collection
@@ -73,14 +72,10 @@ process.hbherecoM3 = process.hbheprereco.clone()
 process.hbherecoM3.puCorrMethod = cms.int32(3)
 
 # Method 0 collection
+#process.hbherecoM0 = process.hbheprereco.clone()
 #process.hbherecoM0.puCorrMethod = cms.int32(0)
 
-# MAHI 0 collection
-process.hbherecoMAHIcsv = process.hbheprereco.clone()
-process.hbherecoMAHIcsv.puCorrMethod = cms.int32(10)
-process.hbherecoMAHIcsv.pulseShapeType = cms.int32(2)
-
-# MAHI 0 collection
+# MAHI collection
 process.hbherecoMAHIlagcsv = process.hbheprereco.clone()
 process.hbherecoMAHIlagcsv.puCorrMethod = cms.int32(10)
 process.hbherecoMAHIlagcsv.pulseShapeType = cms.int32(3)
@@ -119,7 +114,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
 #process.reconstruction_step = cms.Path(process.reconstruction* process.hbherecoM2csv* process.hbherecoM2lagcsv * process.hbherecoM3 * process.hbherecoM0 * process.hbherecoMAHIcsv * process.hbherecoMAHIlagcsv )
-process.reconstruction_step = cms.Path(process.reconstruction* process.hbherecoM2csv* process.hbherecoM2lagcsv * process.hbherecoM3 * process.hbherecoMAHIcsv * process.hbherecoMAHIlagcsv )
+process.reconstruction_step = cms.Path(process.reconstruction* process.hbherecoM2 * process.hbherecoM2csv* process.hbherecoM2lagcsv * process.hbherecoM3 * process.hbherecoMAHIlagcsv )
 ##process.reconstruction_step = cms.Path(process.reconstruction)
 process.eventinterpretaion_step = cms.Path(process.EIsequence)
 
