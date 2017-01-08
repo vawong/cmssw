@@ -123,6 +123,9 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
       TH1F *hChecknoiseADC_endcap;
       TH1F *hChecknoiseDC_endcap;
 
+      TH2F *hCheckEnergyADCnoise_VSfc_endcap;
+      TH2F *hCheckEnergyADCnoise_VSfc_barrel;
+
       TH1F *hCheckEnergyM2_barrel;
       TH1F *hCheckEnergyM2_endcap;
       TH1F *hCheckEnergyM2_barrel_zoom;
@@ -285,6 +288,10 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
 
   hCheckCharge_barrel = FileService->make<TH1F>("charge_barrel","charge_barrel", 1000., 0., 10.);
   hChecknoiseADC_barrel = FileService->make<TH1F>("charge_noiseADC_barrel","charge_noiseADC_barrel", 1000., 0., 10.);
+
+  hCheckEnergyADCnoise_VSfc_endcap = FileService->make<TH2F>("ADCnoise_VSfc_endcap","ADCnoise_VSfc_endcap", 10000, 0., 100000., 1000, 0.005, 0.1);
+  hCheckEnergyADCnoise_VSfc_barrel = FileService->make<TH2F>("ADCnoise_VSfc_barrel","ADCnoise_VSfc_barrel", 10000, 0., 100000., 1000, 0.005, 0.1);
+
 
   hChi2Energy_barrel = FileService->make<TH2F>("hChi2Energy_barrel","hChi2Energy_barrel",100,0.,500.,100,-2, 5.);
   hChi2Energy_endcap = FileService->make<TH2F>("hChi2Energy_endcap","hChi2Energy_endcap",100,0.,500.,100,-2, 5.);
@@ -709,6 +716,9 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
       if(!(*channelData)[i].hasTimeInfo()) totCharge_HB += charge-ped;
       if(!(*channelData)[i].hasTimeInfo()) noiseADC_HB += sigmaHPDQIE8(charge);
+
+      if((*channelData)[i].hasTimeInfo()) hCheckEnergyADCnoise_VSfc_endcap->Fill(charge,(1./sqrt(12))*(*channelData)[i].tsDFcPerADC(ip)/charge);
+      if(!(*channelData)[i].hasTimeInfo()) hCheckEnergyADCnoise_VSfc_barrel->Fill(charge,(1./sqrt(12))*(*channelData)[i].tsDFcPerADC(ip)/charge);
 
       /*
       noiseDCArr[ip] = 0;
