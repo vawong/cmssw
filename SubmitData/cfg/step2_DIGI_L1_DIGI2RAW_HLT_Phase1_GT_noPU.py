@@ -21,7 +21,7 @@ process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Digi_cff')
 process.load('Configuration.StandardSequences.SimL1Emulator_cff')
 process.load('Configuration.StandardSequences.DigiToRaw_cff')
-process.load('HLTrigger.Configuration.HLT_Fake_cff')
+process.load('HLTrigger.Configuration.HLT_GRun_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
@@ -33,7 +33,7 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
     dropDescendantsOfDroppedBranches = cms.untracked.bool(False),
     fileNames = cms.untracked.vstring(
-        'root://eoscms//eos/cms/store/cmst3/user/dalfonso/HCAL/8_1_0_pre16/step1_piE1to100_2017_ev10k.root'
+        'root://eoscms//eos/cms/store/cmst3/user/dalfonso/HCAL/9_0_0_pre2/step1_pi500_phase1.root'
     ),
 
     inputCommands = cms.untracked.vstring('keep *', 
@@ -75,7 +75,7 @@ process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(10485760),
-    fileName = cms.untracked.string('file:step2_pi1-100_2017_realistic.root'),
+    fileName = cms.untracked.string('file:step2_pi500_2017_realistic.root'),
     outputCommands = process.FEVTDEBUGHLTEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
@@ -89,6 +89,16 @@ process.mix.digitizers = cms.PSet(process.theDigitizersValid)
 ##process.mix.digitizers.hcal.doTimeSlew = cms.bool(False)
 ##process.mix.digitizers.hcal.he.timePhase = cms.double(7.5)
 ##process.mix.digitizers.hcal.hb.timePhase = cms.double(7.5)
+
+## MARIA temporarily switch off the noise
+#process.mix.digitizers.hcal.doNoise = cms.bool(False)
+
+## MARIA temporarily switch off the geantTime
+#process.mix.digitizers.hcal.ignoreGeantTime = cms.bool(True)
+
+##  MARIA temporarily switch off the photon statistics
+##process.mix.digitizers.hcal.he.doPhotoStatistics = cms.bool(False)
+
 
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
@@ -130,6 +140,10 @@ process = customizeHLTforFullSim(process)
 # End of customisation functions
 
 # Customisation from command line
+# Add early deletion of temporary data products to reduce peak memory need
+from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
+process = customiseEarlyDelete(process)
+
 
 dumpFile  = open("DumpRECO_Phase1_step2_GT.py", "w")
 dumpFile.write(process.dumpPython())
