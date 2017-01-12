@@ -134,22 +134,30 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '
 # Save HBHEChannelInfo
 process.hbheprereco.saveInfos = cms.bool(True)
 
+process.hbheprerecoM2 = process.hbheprereco.clone()
+process.hbheprerecoM2.algorithm.__setattr__('useM2',cms.bool(True))
+process.hbheprerecoM2.algorithm.__setattr__('useM3',cms.bool(False))
+
 process.hbheprerecoM3 = process.hbheprereco.clone()
 process.hbheprerecoM3.algorithm.__setattr__('useM2',cms.bool(False))
 process.hbheprerecoM3.algorithm.__setattr__('useM3',cms.bool(True))
 
 process.hbheprerecoM2csv = process.hbheprereco.clone()
-process.hbheprerecoM2csv.algorithm.__setattr__('useM2',cms.bool(False))
+process.hbheprerecoM2csv.algorithm.__setattr__('useM2',cms.bool(True))
 process.hbheprerecoM2csv.algorithm.__setattr__('pulseShapeType',cms.int32(2))
 
-##process.hbheprerecoM2lagcsv = process.hbheprereco.clone()
-##process.hbheprerecoM2lagcsv.algorithm.__setattr__('useM2',cms.bool(False))
-##process.hbheprerecoM2lagcsv.algorithm.__setattr__('pulseShapeType',cms.int32(3))
+process.hbheprerecoM2lagcsv = process.hbheprereco.clone()
+process.hbheprerecoM2lagcsv.algorithm.__setattr__('useM2',cms.bool(True))
+process.hbheprerecoM2lagcsv.algorithm.__setattr__('pulseShapeType',cms.int32(3))
+
+process.hbherecoMAHIlagcsv = process.hbheprereco.clone()
+process.hbherecoMAHIlagcsv.algorithm.__setattr__('useMahi',cms.bool(True))
+process.hbherecoMAHIlagcsv.algorithm.__setattr__('pulseShapeType',cms.int32(3))
 
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
-process.reconstruction_step = cms.Path(process.reconstruction*process.hbheprerecoM3*process.hbheprerecoM2csv)
+process.reconstruction_step = cms.Path(process.reconstruction*process.hbheprerecoM2*process.hbheprerecoM3*process.hbheprerecoM2csv*process.hbheprerecoM2lagcsv*process.hbherecoMAHIlagcsv)
 process.eventinterpretaion_step = cms.Path(process.EIsequence)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
