@@ -25,7 +25,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(10)
 )
 
 # Input source
@@ -117,7 +117,7 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    fileName = cms.untracked.string('file:step3_ttbar_noPU_2017_realistic.root'),
+    fileName = cms.untracked.string('file:step3_visualizePi.root'),
     outputCommands = process.RECOSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
@@ -168,7 +168,8 @@ process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
 process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.eventinterpretaion_step,process.endjob_step,process.RECOSIMoutput_step)
 
 #Setup FWK for multithreaded
-process.options.numberOfThreads=cms.untracked.uint32(16)
+#process.options.numberOfThreads=cms.untracked.uint32(16)
+process.options.numberOfThreads=cms.untracked.uint32(1)
 process.options.numberOfStreams=cms.untracked.uint32(0)
 
 #do not add changes to your config after this point (unless you know what you are doing)
@@ -182,7 +183,7 @@ process=cleanUnscheduled(process)
 from Validation.Performance.TimeMemoryInfo import customise
 
 #call to customisation function customise imported from Validation.Performance.TimeMemoryInfo
-process = customise(process)
+#process = customise(process)
 
 ##from SLHCUpgradeSimulations.Configuration.HCalCustoms import load_HcalHardcode
 ##process = load_HcalHardcode(process)
