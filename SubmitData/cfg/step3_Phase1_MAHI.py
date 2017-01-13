@@ -25,7 +25,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(100)
 )
 
 # Input source
@@ -117,7 +117,7 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    fileName = cms.untracked.string('file:step3_visualizePi.root'),
+    fileName = cms.untracked.string('file:step3_timing.root'),
     outputCommands = process.RECOSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
@@ -137,22 +137,30 @@ process.hbheprereco.saveInfos = cms.bool(True)
 
 process.hbheprerecoM2 = process.hbheprereco.clone()
 process.hbheprerecoM2.algorithm.__setattr__('useM2',cms.bool(True))
+process.hbheprerecoM2.algorithm.__setattr__('useM3',cms.bool(False))
+process.hbheprerecoM2.algorithm.__setattr__('useMahi',cms.bool(False))
 process.hbheprerecoM2.algorithm.__setattr__('pulseShapeType',cms.int32(1))
-
 
 process.hbheprerecoM3 = process.hbheprereco.clone()
 process.hbheprerecoM3.algorithm.__setattr__('useM2',cms.bool(False))
 process.hbheprerecoM3.algorithm.__setattr__('useM3',cms.bool(True))
+process.hbheprerecoM3.algorithm.__setattr__('useMahi',cms.bool(False))
 
 process.hbheprerecoM2csv = process.hbheprereco.clone()
 process.hbheprerecoM2csv.algorithm.__setattr__('useM2',cms.bool(True))
+process.hbheprerecoM2csv.algorithm.__setattr__('useM3',cms.bool(False))
+process.hbheprerecoM2csv.algorithm.__setattr__('useMahi',cms.bool(False))
 process.hbheprerecoM2csv.algorithm.__setattr__('pulseShapeType',cms.int32(2))
 
 process.hbheprerecoM2lagcsv = process.hbheprereco.clone()
 process.hbheprerecoM2lagcsv.algorithm.__setattr__('useM2',cms.bool(True))
+process.hbheprerecoM2lagcsv.algorithm.__setattr__('useM3',cms.bool(False))
+process.hbheprerecoM2lagcsv.algorithm.__setattr__('useMahi',cms.bool(False))
 process.hbheprerecoM2lagcsv.algorithm.__setattr__('pulseShapeType',cms.int32(3))
 
 process.hbherecoMAHIlagcsv = process.hbheprereco.clone()
+process.hbherecoMAHIlagcsv.algorithm.__setattr__('useM2',cms.bool(False))
+process.hbherecoMAHIlagcsv.algorithm.__setattr__('useM3',cms.bool(False))
 process.hbherecoMAHIlagcsv.algorithm.__setattr__('useMahi',cms.bool(True))
 process.hbherecoMAHIlagcsv.algorithm.__setattr__('pulseShapeType',cms.int32(3))
 
@@ -168,8 +176,8 @@ process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
 process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.eventinterpretaion_step,process.endjob_step,process.RECOSIMoutput_step)
 
 #Setup FWK for multithreaded
-#process.options.numberOfThreads=cms.untracked.uint32(16)
-process.options.numberOfThreads=cms.untracked.uint32(1)
+process.options.numberOfThreads=cms.untracked.uint32(16)
+#process.options.numberOfThreads=cms.untracked.uint32(1)
 process.options.numberOfStreams=cms.untracked.uint32(0)
 
 #do not add changes to your config after this point (unless you know what you are doing)
@@ -183,7 +191,7 @@ process=cleanUnscheduled(process)
 from Validation.Performance.TimeMemoryInfo import customise
 
 #call to customisation function customise imported from Validation.Performance.TimeMemoryInfo
-#process = customise(process)
+process = customise(process)
 
 ##from SLHCUpgradeSimulations.Configuration.HCalCustoms import load_HcalHardcode
 ##process = load_HcalHardcode(process)
