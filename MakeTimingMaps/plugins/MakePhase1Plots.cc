@@ -85,6 +85,7 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
       // some variables for storing information
       double Method0Energy;
       double RecHitEnergy;
+      double RecHitEnergyM3;
       double RecHitTime;
       double RecHitChi2;
       int LumiBlock;
@@ -786,6 +787,7 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     RecHitEnergy = (*hRecHits)[i].energy();
     RecHitTime = (*hRecHits)[i].time();
     RecHitChi2 = (*hRecHits)[i].chi2();
+    RecHitEnergyM3 = (*hRecHits)[i].eraw();
 
     //    cout << " energy M2= " << RecHitEnergy << " RecHitTime M2=" << RecHitTime << " RecHitChi2=" << RecHitChi2 << endl;
     //    if(Method0Energy>5) cout << "energy="<< Method0Energy << "  ; chi2=" << (*hRecHits)[i].chi2() << endl;
@@ -887,27 +889,20 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     // CORRELATION WITH M3
     //$$$$$$$$$$$$$$$
 
-    // Loop over all rechits in one event
-    for(int m = 0; m < (int)hRecHitsM3->size(); m++) {
-
-      HcalDetId detID_rh_M3 = (*hRecHitsM3)[m].id().rawId();
-      if(detID_rh_M3==detID_rh) {
-	if(std::abs(iEta) >=19  && std::abs(iEta)<=26 ) {
-	  hCheckEnergyM2M3_endcap->Fill(RecHitEnergy,(*hRecHitsM3)[m].energy());
-	  hCheckEnergyM2M3_endcap_zoom->Fill(RecHitEnergy,(*hRecHitsM3)[m].energy());
-	  hCheckEnergyM2M3ratio_endcap_vsM2E->Fill(RecHitEnergy,(*hRecHitsM3)[m].energy()/RecHitEnergy);
-	  hCheckEnergyM2M3ratio_endcap_vsM2E_zoom->Fill(RecHitEnergy,(*hRecHitsM3)[m].energy()/RecHitEnergy);
-	  hCheckEnergyM2M3ratio_endcap->Fill((*hRecHitsM3)[m].energy()/RecHitEnergy);
-	}
-	if(std::abs(iEta) < 14) {
-	  hCheckEnergyM2M3_barrel->Fill(RecHitEnergy,(*hRecHitsM3)[m].energy());
-	  hCheckEnergyM2M3_barrel_zoom->Fill(RecHitEnergy,(*hRecHitsM3)[m].energy());
-	  hCheckEnergyM2M3ratio_barrel_vsM2E->Fill(RecHitEnergy,(*hRecHitsM3)[m].energy()/RecHitEnergy);
-	  hCheckEnergyM2M3ratio_barrel_vsM2E_zoom->Fill(RecHitEnergy,(*hRecHitsM3)[m].energy()/RecHitEnergy);
-	  hCheckEnergyM2M3ratio_barrel->Fill((*hRecHitsM3)[m].energy()/RecHitEnergy);
-	}
-      }
-    } // end M3
+    if(std::abs(iEta) >=19  && std::abs(iEta)<=26 ) {
+      hCheckEnergyM2M3_endcap->Fill(RecHitEnergy,RecHitEnergyM3);
+      hCheckEnergyM2M3_endcap_zoom->Fill(RecHitEnergy,RecHitEnergyM3);
+      hCheckEnergyM2M3ratio_endcap_vsM2E->Fill(RecHitEnergy,RecHitEnergyM3/RecHitEnergy);
+      hCheckEnergyM2M3ratio_endcap_vsM2E_zoom->Fill(RecHitEnergy,RecHitEnergyM3/RecHitEnergy);
+      hCheckEnergyM2M3ratio_endcap->Fill(RecHitEnergyM3/RecHitEnergy);
+    }
+    if(std::abs(iEta) < 14) {
+      hCheckEnergyM2M3_barrel->Fill(RecHitEnergy,RecHitEnergyM3);
+      hCheckEnergyM2M3_barrel_zoom->Fill(RecHitEnergy,RecHitEnergyM3);
+      hCheckEnergyM2M3ratio_barrel_vsM2E->Fill(RecHitEnergy,RecHitEnergyM3/RecHitEnergy);
+      hCheckEnergyM2M3ratio_barrel_vsM2E_zoom->Fill(RecHitEnergy,RecHitEnergyM3/RecHitEnergy);
+      hCheckEnergyM2M3ratio_barrel->Fill(RecHitEnergyM3/RecHitEnergy);
+    }
 
     //$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     /// CORRELATION WITH SIMHITS
