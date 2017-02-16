@@ -118,6 +118,17 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
       TH2F *hCheckEnergyM2M3ratio_barrel_vsM2E_zoom;
       TH2F *hCheckEnergyM2M3ratio_endcap_vsM2E_zoom;
 
+      TH2F *hCheckEnergyM2M0_endcap;
+      TH2F *hCheckEnergyM2M0_endcap_zoom;
+      TH2F *hCheckEnergyM2M0_barrel;
+      TH2F *hCheckEnergyM2M0_barrel_zoom;
+      TH1F *hCheckEnergyM2M0ratio_barrel;
+      TH1F *hCheckEnergyM2M0ratio_endcap;
+      TH2F *hCheckEnergyM2M0ratio_barrel_vsM2E;
+      TH2F *hCheckEnergyM2M0ratio_endcap_vsM2E;
+      TH2F *hCheckEnergyM2M0ratio_barrel_vsM2E_zoom;
+      TH2F *hCheckEnergyM2M0ratio_endcap_vsM2E_zoom;
+
       TH1F *hCheckCharge_barrel;
       TH1F *hChecknoiseADC_barrel;
       TH1F *hCheckCharge_endcap;
@@ -377,6 +388,45 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
   hCheckEnergyM2M3ratio_barrel_vsM2E_zoom->GetYaxis()->SetTitle("M3energy/M2energy");
   hCheckEnergyM2M3ratio_endcap_vsM2E_zoom->GetYaxis()->SetTitle("M3energy/M2energy");
 
+  //////
+  //////
+  //////
+
+  hCheckEnergyM2M0_barrel = FileService->make<TH2F>("M2M0plot_barrel","M2M0plot_barrel",100,0.,500.,100,0.,500.);
+  hCheckEnergyM2M0_barrel_zoom = FileService->make<TH2F>("M2M0plot_barrel_zoom","M2M0plot_barrel_zoom",50,0.,5.,50,0.,5.);
+  hCheckEnergyM2M0_endcap = FileService->make<TH2F>("M2M0plot_endcap","M2M0plot_endcap",100,0.,500.,100,0.,500.);
+  hCheckEnergyM2M0_endcap_zoom = FileService->make<TH2F>("M2M0plot_endcap_zoom","M2M0plot_endcap_zoom",50,0.,5.,50,0.,5.);
+  hCheckEnergyM2M0ratio_barrel = FileService->make<TH1F>("EnergyM2M0ratio_barrel","EnergyM2M0ratio_barrel",100,0.5,1.5);
+  hCheckEnergyM2M0ratio_endcap = FileService->make<TH1F>("EnergyM2M0ratio_endcap","EnergyM2M0ratio_endcap",100,0.5,1.5);
+
+  hCheckEnergyM2M0ratio_barrel_vsM2E = FileService->make<TH2F>("M2M0ratio_barrel_vsM2E","M2M0ratio_barrel_vsM2E",50,0.,500.,50,0.5,1.5);
+  hCheckEnergyM2M0ratio_endcap_vsM2E = FileService->make<TH2F>("M2M0ratio_endcap_vsM2E","M2M0ratio_endcap_vsM2E ",50,0.,500.,50,0.5,1.5);
+
+  hCheckEnergyM2M0ratio_barrel_vsM2E_zoom = FileService->make<TH2F>("M2M0ratio_barrel_vsM2E_zoom","M2M0ratio_barrel_vsM2E_zoom",100,0.,5.,40,0.,2.);
+  hCheckEnergyM2M0ratio_endcap_vsM2E_zoom = FileService->make<TH2F>("M2M0ratio_endcap_vsM2E_zoom","M2M0ratio_endcap_vsM2E_zoom ",100,0.,5.,40,0.,2.);
+
+  hCheckEnergyM2M0_barrel->GetYaxis()->SetTitle("M0 Energy");
+  hCheckEnergyM2M0_barrel_zoom->GetYaxis()->SetTitle("M0 Energy");
+  hCheckEnergyM2M0_endcap->GetYaxis()->SetTitle("M0 Energy");
+  hCheckEnergyM2M0_endcap_zoom->GetYaxis()->SetTitle("M0 Energy");
+
+  hCheckEnergyM2M0_barrel->GetXaxis()->SetTitle("M2 Energy");
+  hCheckEnergyM2M0_barrel_zoom->GetXaxis()->SetTitle("M2 Energy");
+  hCheckEnergyM2M0_endcap->GetXaxis()->SetTitle("M2 Energy");
+  hCheckEnergyM2M0_endcap_zoom->GetXaxis()->SetTitle("M2 Energy");
+
+  hCheckEnergyM2M0ratio_barrel->GetXaxis()->SetTitle("M0energy/M2energy");
+  hCheckEnergyM2M0ratio_endcap->GetXaxis()->SetTitle("M0energy/M2energy");
+
+  hCheckEnergyM2M0ratio_barrel_vsM2E->GetXaxis()->SetTitle("M2energy");
+  hCheckEnergyM2M0ratio_endcap_vsM2E->GetXaxis()->SetTitle("M2energy");
+  hCheckEnergyM2M0ratio_barrel_vsM2E->GetYaxis()->SetTitle("M0energy/M2energy");
+  hCheckEnergyM2M0ratio_endcap_vsM2E->GetYaxis()->SetTitle("M0energy/M2energy");
+
+  hCheckEnergyM2M0ratio_barrel_vsM2E_zoom->GetXaxis()->SetTitle("M2energy");
+  hCheckEnergyM2M0ratio_endcap_vsM2E_zoom->GetXaxis()->SetTitle("M2energy");
+  hCheckEnergyM2M0ratio_barrel_vsM2E_zoom->GetYaxis()->SetTitle("M0energy/M2energy");
+  hCheckEnergyM2M0ratio_endcap_vsM2E_zoom->GetYaxis()->SetTitle("M0energy/M2energy");
 
   //////
   //////
@@ -941,11 +991,19 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     //$$$$$$$$$$$$$$$
 
     if(std::abs(iEta) >=19  && std::abs(iEta)<=26 ) {
+
       hCheckEnergyM2M3_endcap->Fill(RecHitEnergy,RecHitEnergyM3);
       hCheckEnergyM2M3_endcap_zoom->Fill(RecHitEnergy,RecHitEnergyM3);
       hCheckEnergyM2M3ratio_endcap_vsM2E->Fill(RecHitEnergy,RecHitEnergyM3/RecHitEnergy);
       hCheckEnergyM2M3ratio_endcap_vsM2E_zoom->Fill(RecHitEnergy,RecHitEnergyM3/RecHitEnergy);
       hCheckEnergyM2M3ratio_endcap->Fill(RecHitEnergyM3/RecHitEnergy);
+
+      hCheckEnergyM2M0_endcap->Fill(RecHitEnergy,Method0Energy);
+      hCheckEnergyM2M0_endcap_zoom->Fill(RecHitEnergy,Method0Energy);
+      hCheckEnergyM2M0ratio_endcap_vsM2E->Fill(RecHitEnergy,Method0Energy/RecHitEnergy);
+      hCheckEnergyM2M0ratio_endcap_vsM2E_zoom->Fill(RecHitEnergy,Method0Energy/RecHitEnergy);
+      hCheckEnergyM2M0ratio_endcap->Fill(Method0Energy/RecHitEnergy);
+
     }
     if(std::abs(iEta) < 14) {
       hCheckEnergyM2M3_barrel->Fill(RecHitEnergy,RecHitEnergyM3);
@@ -953,6 +1011,12 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       hCheckEnergyM2M3ratio_barrel_vsM2E->Fill(RecHitEnergy,RecHitEnergyM3/RecHitEnergy);
       hCheckEnergyM2M3ratio_barrel_vsM2E_zoom->Fill(RecHitEnergy,RecHitEnergyM3/RecHitEnergy);
       hCheckEnergyM2M3ratio_barrel->Fill(RecHitEnergyM3/RecHitEnergy);
+
+      hCheckEnergyM2M0_barrel->Fill(RecHitEnergy,Method0Energy);
+      hCheckEnergyM2M0_barrel_zoom->Fill(RecHitEnergy,Method0Energy);
+      hCheckEnergyM2M0ratio_barrel_vsM2E->Fill(RecHitEnergy,Method0Energy/RecHitEnergy);
+      hCheckEnergyM2M0ratio_barrel_vsM2E_zoom->Fill(RecHitEnergy,Method0Energy/RecHitEnergy);
+      hCheckEnergyM2M0ratio_barrel->Fill(Method0Energy/RecHitEnergy);
     }
 
     if(!isData) {
