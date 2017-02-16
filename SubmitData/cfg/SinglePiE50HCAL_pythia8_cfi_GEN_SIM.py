@@ -15,8 +15,8 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-process.load('Configuration.Geometry.GeometryExtended2017devReco_cff')
-process.load('Configuration.Geometry.GeometryExtended2017dev_cff')
+process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+process.load('Configuration.StandardSequences.GeometrySimDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Generator_cff')
 process.load('IOMC.EventVertexGenerators.VtxSmearedRealistic50ns13TeVCollision_cfi')
@@ -64,7 +64,7 @@ process.FEVTDEBUGoutput = cms.OutputModule("PoolOutputModule",
 # Other statements
 process.genstepfilter.triggerConditions=cms.vstring("generation_step")
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_design', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
 
 process.generator = cms.EDFilter("Pythia8EGun",
     PGunParameters = cms.PSet(
@@ -99,7 +99,13 @@ process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary
 for path in process.paths:
 	getattr(process,path)._seq = process.generator * getattr(process,path)._seq 
 
+#Setup FWK for multithreaded
+
+process.options.numberOfThreads=cms.untracked.uint32(16)
+process.options.numberOfStreams=cms.untracked.uint32(0)
+
 # customisation of the process.
+
 
 # Automatic addition of the customisation function from SLHCUpgradeSimulations.Configuration.HCalCustoms
 from SLHCUpgradeSimulations.Configuration.HCalCustoms import customise_Hcal2017Full 
@@ -110,3 +116,8 @@ process = customise_Hcal2017Full(process)
 # End of customisation functions
 
 # Customisation from command line
+
+# Add early deletion of temporary data products to reduce peak memory need
+from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
+process = customiseEarlyDelete(process)
+# End adding early deletion
