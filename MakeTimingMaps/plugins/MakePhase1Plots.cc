@@ -118,6 +118,9 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
       TH2F *hCheckEnergyM2M3ratio_barrel_vsM2E_zoom;
       TH2F *hCheckEnergyM2M3ratio_endcap_vsM2E_zoom;
 
+      TH1F *hCheckEnergyM2M3ratio_barrel_gt5;
+      TH1F *hCheckEnergyM2M3ratio_endcap_gt5;
+
       TH2F *hCheckEnergyM2M0_endcap;
       TH2F *hCheckEnergyM2M0_endcap_zoom;
       TH2F *hCheckEnergyM2M0_barrel;
@@ -351,6 +354,9 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
   //////
   //////
   //////
+
+  hCheckEnergyM2M3ratio_barrel_gt5 = FileService->make<TH1F>("EnergyM2M3ratio_barrel_gt5","EnergyM2M3ratio_barrel_gt5",100, 0.5, 1.5);
+  hCheckEnergyM2M3ratio_endcap_gt5 = FileService->make<TH1F>("EnergyM2M3ratio_endcap_gt5","EnergyM2M3ratio_endcap_gt5",100, 0.5, 1.5);
 
   hCheckEnergyM2M3_barrel = FileService->make<TH2F>("M2M3plot_barrel","M2M3plot_barrel",100,0.,500.,100,0.,500.);
   hCheckEnergyM2M3_barrel_zoom = FileService->make<TH2F>("M2M3plot_barrel_zoom","M2M3plot_barrel_zoom",50,0.,5.,50,0.,5.);
@@ -992,6 +998,8 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
     if(std::abs(iEta) >=19  && std::abs(iEta)<=26 ) {
 
+      if(RecHitEnergy>5) hCheckEnergyM2M3ratio_endcap_gt5->Fill(RecHitEnergyM3/RecHitEnergy);
+
       hCheckEnergyM2M3_endcap->Fill(RecHitEnergy,RecHitEnergyM3);
       hCheckEnergyM2M3_endcap_zoom->Fill(RecHitEnergy,RecHitEnergyM3);
       hCheckEnergyM2M3ratio_endcap_vsM2E->Fill(RecHitEnergy,RecHitEnergyM3/RecHitEnergy);
@@ -1006,6 +1014,9 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
     }
     if(std::abs(iEta) < 14) {
+
+      if(RecHitEnergy>5) hCheckEnergyM2M3ratio_barrel_gt5->Fill(RecHitEnergyM3/RecHitEnergy);
+
       hCheckEnergyM2M3_barrel->Fill(RecHitEnergy,RecHitEnergyM3);
       hCheckEnergyM2M3_barrel_zoom->Fill(RecHitEnergy,RecHitEnergyM3);
       hCheckEnergyM2M3ratio_barrel_vsM2E->Fill(RecHitEnergy,RecHitEnergyM3/RecHitEnergy);
