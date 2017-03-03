@@ -123,10 +123,10 @@ process.options.numberOfStreams=cms.untracked.uint32(0)
 # customisation of the process.
 
 # Automatic addition of the customisation function from HLTrigger.Configuration.customizeHLTforMC
-from HLTrigger.Configuration.customizeHLTforMC import customizeHLTforFullSim 
+#from HLTrigger.Configuration.customizeHLTforMC import customizeHLTforFullSim
 
 #call to customisation function customizeHLTforFullSim imported from HLTrigger.Configuration.customizeHLTforMC
-process = customizeHLTforFullSim(process)
+#process = customizeHLTforFullSim(process)
 
 ##from SLHCUpgradeSimulations.Configuration.HCalCustoms import load_HcalHardcode
 ##process = load_HcalHardcode(process)
