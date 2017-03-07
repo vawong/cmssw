@@ -5,6 +5,12 @@ process = cms.Process("Demo")
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.options = cms.untracked.PSet (wantSummary = cms.untracked.bool(False))
 
+process.load("Configuration.Geometry.GeometryIdeal_cff")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+from Configuration.AlCa.GlobalTag import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
+
+
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
@@ -16,7 +22,7 @@ process.source = cms.Source("PoolSource",
     )
 )
 
-process.timingMaps = cms.EDAnalyzer('MakeRun2Plots')
+process.timingMaps = cms.EDAnalyzer('MakePhase1Plots')
 
 process.TFileService = cms.Service('TFileService', fileName = cms.string('phase1Plot.root') )
 
