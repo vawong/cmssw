@@ -60,6 +60,10 @@ using namespace std;
 #include "Geometry/HcalCommonData/interface/HcalHitRelabeller.h"
 #include "Geometry/HcalCommonData/interface/HcalDDDRecConstants.h"
 
+#include "Geometry/CaloGeometry/interface/CaloGeometry.h"
+#include "Geometry/Records/interface/CaloGeometryRecord.h"
+#include "SimCalorimetry/CaloSimAlgos/interface/CaloHitResponse.h"
+
 #include "Geometry/Records/interface/HcalRecNumberingRecord.h"
 #include "CondFormats/HcalObjects/interface/HcalLogicalMap.h"
 #include "CalibCalorimetry/HcalAlgos/interface/HcalLogicalMapGenerator.h"
@@ -233,7 +237,10 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
       TH2F *occupancy_d5;
       TH2F *occupancy_d6;
 
-  const HcalDDDRecConstants *hcons;
+  //const HcalDDDRecConstants *hcons;
+  const HcalDDDRecConstants * theRecNumber;
+  const CaloGeometry* theGeometry;
+  CaloHitResponse* theResponse;
 
   /*  
 
@@ -786,17 +793,24 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   Handle<PCaloHitContainer> hSimHits;      // create handle
 
   edm::ESHandle<HcalDDDRecConstants> pHRNDC;
+  edm::ESHandle<CaloGeometry> geometry;
   if(!isData) {
     iEvent.getByToken(InfoToken, channelData); // get events based on token
-
     iEvent.getByToken(hSHitToken, hSimHits);   // SimHits
-
+    
     iSetup.get<HcalRecNumberingRecord>().get( pHRNDC );
-    hcons = &(*pHRNDC);
+    iSetup.get<CaloGeometryRecord>().get( geometry );
+  
+    theGeometry = &*geometry;
+    theRecNumber= &*pHRNDC;
+
+    std::cout << typeid(theGeometry).name() << std::endl;
+
+    theResponse = new CaloHitResponse(NULL, (CaloShapes*)NULL);
+
+    theResponse->setGeometry(theGeometry);
+
   }
-
-
-
   if(!isData) {
   // Loop over all rechits in one event
   for(int i = 0; i < (int) channelData->size(); i++) {
@@ -895,7 +909,7 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     
     // get ID information for the reconstructed hit
     HcalDetId detID_rh = (*hRecHits)[i].id().rawId();
-    
+
     // ID information can get us detector coordinates
     depth = (*hRecHits)[i].id().depth();
     iEta = detID_rh.ieta();
@@ -1064,12 +1078,14 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     double SHitEn=0;
     for (int j=0; j < (int) hSimHits->size(); j++) {
 
-      HcalDetId simId = HcalHitRelabeller::relabel((*hSimHits)[j].id(), hcons);
+      HcalDetId simId = HcalHitRelabeller::relabel((*hSimHits)[j].id(), theRecNumber);
 
       // check that the SimHits are in the same channel as the rechit
       //      if (simId == detID_rh && (*hSimHits)[j].time() > 0 && (*hSimHits)[j].time() < 40)
       if (simId == detID_rh )
 	SHitEn += SamplingFactor*((*hSimHits)[j].energy());
+
+      std::cout << theResponse->timeOfFlight(simId) << std::endl;
     }
 
     //    cout << "SHitEn = " << SHitEn << endl;
