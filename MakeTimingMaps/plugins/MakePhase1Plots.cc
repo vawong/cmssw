@@ -191,6 +191,13 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
       TH1F *hCheckChi2MX_barrel_lt5;
       TH1F *hCheckChi2MX_endcap_lt5;
 
+      TH2F *hCheckTimeSIMHITM2_HB;  
+      TH2F *hCheckTimeSIMHITM2_HE;  
+      TH2F *hCheckTimeSIMHITM2_HB1;  
+      TH2F *hCheckTimeSIMHITM2_HE1;  
+
+
+
       TH2F *hCheckEnergySIMHITM2_HB;
       TH2F *hCheckEnergySIMHITM2_HE;
       TH1F *hCheckM2Pull_HB;
@@ -209,6 +216,9 @@ class MakePhase1Plots : public edm::one::EDAnalyzer<edm::one::SharedResources>  
       TH1F *hCheckChi2MX_endcap_depth4_gt5;
       TH1F *hCheckChi2MX_endcap_depth5_gt5;
       TH1F *hCheckChi2MX_endcap_depth6_gt5;
+
+      TH2F *hCheckEnergyTimingSIM_HB; 
+      TH2F *hCheckEnergyTimingSIM_HE; 
 
       TH2F *hCheckEnergyTiming_barrel;
       TH2F *hCheckEnergyTiming_endcap;
@@ -535,6 +545,15 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
   hCheckEnergyTiming_endcap->GetXaxis()->SetTitle("M2 energy");
   hCheckEnergyTiming_endcap->GetYaxis()->SetTitle("M2 timing");
 
+
+  hCheckEnergyTimingSIM_HB = FileService->make<TH2F>("EnergyTimingSIM_HPD","EnergyTimingSIM_HPD",100,0.,500.,40,-10.,30.);
+  hCheckEnergyTimingSIM_HE = FileService->make<TH2F>("EnergyTimingSIM_SiPM","EnergyTimingSIM_SiPM",100,0.,500.,40,-10.,30.);
+  hCheckEnergyTimingSIM_HB->GetXaxis()->SetTitle("SimHit energy");
+  hCheckEnergyTimingSIM_HB->GetYaxis()->SetTitle("SimHit timing");
+  hCheckEnergyTimingSIM_HE->GetXaxis()->SetTitle("SimHit energy");
+  hCheckEnergyTimingSIM_HE->GetYaxis()->SetTitle("SimHit timing");
+
+
   hCheckT45ratioVST4_barrel = FileService->make<TH2F>("T45ratioVST4_barrel","T45ratioVST4_barrel", 30,0.,3., 500,0.,500.);
   hCheckT45ratioVST4_endcap = FileService->make<TH2F>("T45ratioVST4_endcap","T45ratioVST4_endcap", 30,0.,3., 500,0.,500.);
 
@@ -712,6 +731,24 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
 
   // simHIT
 
+
+  hCheckTimeSIMHITM2_HB = FileService->make<TH2F>("TimeSIMHITM2HB","TimeSIMHITM2HB",100,-5.,25.,100,-10.,10.);
+  hCheckTimeSIMHITM2_HB->GetXaxis()->SetTitle("SIMHIT Time(HB)");
+  hCheckTimeSIMHITM2_HB->GetYaxis()->SetTitle("M2 Time(HB)");
+
+  hCheckTimeSIMHITM2_HE = FileService->make<TH2F>("TimeSIMHITM2HE","TimeSIMHITM2HE",100,-5.,25.,100,-10.,10.);
+  hCheckTimeSIMHITM2_HE->GetXaxis()->SetTitle("SIMHIT Time(HE)");
+  hCheckTimeSIMHITM2_HE->GetYaxis()->SetTitle("M2 Time(HE)");
+
+  hCheckTimeSIMHITM2_HB1 = FileService->make<TH2F>("TimeSIMHITM2HB1","TimeSIMHITM2HB1",100,-5.,25.,100,-10.,10.);
+  hCheckTimeSIMHITM2_HB1->GetXaxis()->SetTitle("SIMHIT Time(HB)");
+  hCheckTimeSIMHITM2_HB1->GetYaxis()->SetTitle("M2 Time(HB)");
+
+  hCheckTimeSIMHITM2_HE1 = FileService->make<TH2F>("TimeSIMHITM2HE1","TimeSIMHITM2HE1",100,-5.,25.,100,-10.,10.);
+  hCheckTimeSIMHITM2_HE1->GetXaxis()->SetTitle("SIMHIT Time(HE)");
+  hCheckTimeSIMHITM2_HE1->GetYaxis()->SetTitle("M2 Time(HE)");
+
+
   hCheckEnergySIMHITM2_HB = FileService->make<TH2F>("EnergySIMHITM2HB","EnergySIMHITM2HB",50,0.,500.,50,0.,500.);
   hCheckEnergySIMHITM2_HB->GetXaxis()->SetTitle("SIMHIT Energy (HB)");
   hCheckEnergySIMHITM2_HB->GetYaxis()->SetTitle("M2 Energy (HB)");
@@ -719,7 +756,6 @@ MakePhase1Plots::MakePhase1Plots(const edm::ParameterSet& iConfig)
   hCheckEnergySIMHITM2_HE = FileService->make<TH2F>("EnergySIMHITM2HE","EnergySIMHITM2",50,0.,500.,50,0.,500.);
   hCheckEnergySIMHITM2_HE->GetXaxis()->SetTitle("SIMHIT Energy (HE)");
   hCheckEnergySIMHITM2_HE->GetYaxis()->SetTitle("M2 Energy (HE)");
-
 
   hCheckM2Pull_HB = FileService->make<TH1F>("PullM2_HB","PullM2_HB",200,-2,2.);
   hCheckM2Pull_HB->GetXaxis()->SetTitle("(M2-Sim)/Sim");
@@ -804,7 +840,7 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     theGeometry = &*geometry;
     theRecNumber= &*pHRNDC;
 
-    std::cout << typeid(theGeometry).name() << std::endl;
+//    std::cout << typeid(theGeometry).name() << std::endl;
 
     theResponse = new CaloHitResponse(NULL, (CaloShapes*)NULL);
 
@@ -1076,19 +1112,42 @@ MakePhase1Plots::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     //    cout << " SamplingFactor done" << endl;
 
     double SHitEn=0;
+    double MaxEn=0; 
+    int MaxEnk=-1; 
+    HcalDetId simIdneed;
+    double SHitTime = -99.; 
     for (int j=0; j < (int) hSimHits->size(); j++) {
 
       HcalDetId simId = HcalHitRelabeller::relabel((*hSimHits)[j].id(), theRecNumber);
 
       // check that the SimHits are in the same channel as the rechit
       //      if (simId == detID_rh && (*hSimHits)[j].time() > 0 && (*hSimHits)[j].time() < 40)
-      if (simId == detID_rh )
+      if (simId == detID_rh ){
 	SHitEn += SamplingFactor*((*hSimHits)[j].energy());
-
-      std::cout << theResponse->timeOfFlight(simId) << std::endl;
+        if((*hSimHits)[j].energy() > MaxEn){
+                MaxEnk = j;
+                simIdneed = simId;
+                MaxEn = (*hSimHits)[j].energy();
+        }
+      }
+      //std::cout << theResponse->timeOfFlight(simId) << std::endl;
     }
 
     //    cout << "SHitEn = " << SHitEn << endl;
+
+    if(MaxEn>0) {
+	double tof = theResponse->timeOfFlight(simIdneed);
+        SHitTime = (*hSimHits)[MaxEnk].time() - tof;
+    }
+
+    if(MaxEn>0 && fabs((*hRecHits)[i].time())<40. && HPD) hCheckTimeSIMHITM2_HB->Fill(SHitTime,(*hRecHits)[i].time());
+    if(MaxEn>0 && SHitEn>0 && HPD) hCheckEnergyTimingSIM_HB->Fill(SHitEn,SHitTime);
+    if(MaxEn>0 && fabs((*hRecHits)[i].time())<40. && !HPD)hCheckTimeSIMHITM2_HE->Fill(SHitTime,(*hRecHits)[i].time());
+    if(MaxEn>0 && SHitEn>0 && !HPD)hCheckEnergyTimingSIM_HE->Fill(SHitEn,SHitTime);
+    
+    if(MaxEn>0 && SHitEn>10 && fabs((*hRecHits)[i].time())<40. && HPD) hCheckTimeSIMHITM2_HB1->Fill(SHitTime,(*hRecHits)[i].time());
+    if(MaxEn>0 && SHitEn>10 && fabs((*hRecHits)[i].time())<40. && !HPD) hCheckTimeSIMHITM2_HE1->Fill(SHitTime,(*hRecHits)[i].time());
+
 
     if(SHitEn>0 && (*hRecHits)[i].energy()>0 && HPD) hCheckEnergySIMHITM2_HB->Fill(SHitEn,(*hRecHits)[i].energy());
     if(SHitEn>0 && (*hRecHits)[i].energy()>0 && !HPD) hCheckEnergySIMHITM2_HE->Fill(SHitEn,(*hRecHits)[i].energy());
