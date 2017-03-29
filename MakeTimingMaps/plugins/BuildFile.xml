@@ -6,4 +6,6 @@
 <use name="DataFormats/HcalDetId"/>
 <use name="CommonTools/UtilAlgos"/>
 <use name="SimCalorimetry/HcalSimAlgos"/>
+<use name="SimCalorimetry/CaloSimAlgos"/>
+<use name="Geometry/CaloGeometry"/>
 <flags EDM_PLUGIN="1"/>
