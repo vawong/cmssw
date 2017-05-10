@@ -7,7 +7,7 @@ import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
 
-process = cms.Process('HLT3',eras.Run2_2017)
+process = cms.Process('CALMit',eras.Run2_2017)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -15,7 +15,8 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
+process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+process.load('Configuration.StandardSequences.GeometrySimDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.RawToDigi_cff')
 process.load('Configuration.StandardSequences.L1Reco_cff')
@@ -31,8 +32,11 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
+
+'file:step2_pi500_2017_realistic.root'
+
 # single pion without PU                                
-'root://eoscms//eos/cms/store/group/dpg_hcal/comm_hcal/RecoAlgos/SinglePion/LocalGen/Phase1/step2_pi1-100_2017_realistic.root'
+#'root://eoscms//eos/cms/store/group/dpg_hcal/comm_hcal/RecoAlgos/SinglePion/LocalGen/Phase1/step2_pi1-100_2017_realistic.root'
 
 ## this is w/o PU
 #'root://eoscms//eos/cms/store/group/dpg_hcal/comm_hcal/RecoAlgos/Samples_90_pre2/RelValTTbar_13_GEN-SIM-DIGI-RAW_90X_upgrade2017_realistic_v0-v1/34D0D955-66C3-E611-96C0-0025905A48F0.root',
@@ -145,29 +149,30 @@ process.hbheprerecoM3 = process.hbheprereco.clone()
 process.hbheprerecoM3.algorithm.__setattr__('useM2',cms.bool(False))
 process.hbheprerecoM3.algorithm.__setattr__('useM3',cms.bool(True))
 process.hbheprerecoM3.algorithm.__setattr__('useMahi',cms.bool(False))
+process.hbheprerecoM3.algorithm.__setattr__('pulseShapeType',cms.int32(1))
 
-process.hbheprerecoM2csv = process.hbheprereco.clone()
-process.hbheprerecoM2csv.algorithm.__setattr__('useM2',cms.bool(True))
-process.hbheprerecoM2csv.algorithm.__setattr__('useM3',cms.bool(False))
-process.hbheprerecoM2csv.algorithm.__setattr__('useMahi',cms.bool(False))
-process.hbheprerecoM2csv.algorithm.__setattr__('pulseShapeType',cms.int32(2))
+process.hbheprerecoM2new = process.hbheprereco.clone()
+process.hbheprerecoM2new.algorithm.__setattr__('useM2',cms.bool(True))
+process.hbheprerecoM2new.algorithm.__setattr__('useM3',cms.bool(False))
+process.hbheprerecoM2new.algorithm.__setattr__('useMahi',cms.bool(False))
+process.hbheprerecoM2new.algorithm.__setattr__('pulseShapeType',cms.int32(2))
 
-process.hbheprerecoM2lagcsv = process.hbheprereco.clone()
-process.hbheprerecoM2lagcsv.algorithm.__setattr__('useM2',cms.bool(True))
-process.hbheprerecoM2lagcsv.algorithm.__setattr__('useM3',cms.bool(False))
-process.hbheprerecoM2lagcsv.algorithm.__setattr__('useMahi',cms.bool(False))
-process.hbheprerecoM2lagcsv.algorithm.__setattr__('pulseShapeType',cms.int32(3))
+process.hbheprerecoM3new = process.hbheprereco.clone()
+process.hbheprerecoM3new.algorithm.__setattr__('useM2',cms.bool(False))
+process.hbheprerecoM3new.algorithm.__setattr__('useM3',cms.bool(True))
+process.hbheprerecoM3new.algorithm.__setattr__('useMahi',cms.bool(False))
+process.hbheprerecoM3new.algorithm.__setattr__('pulseShapeType',cms.int32(2))
 
-process.hbherecoMAHIlagcsv = process.hbheprereco.clone()
-process.hbherecoMAHIlagcsv.algorithm.__setattr__('useM2',cms.bool(False))
-process.hbherecoMAHIlagcsv.algorithm.__setattr__('useM3',cms.bool(False))
-process.hbherecoMAHIlagcsv.algorithm.__setattr__('useMahi',cms.bool(True))
-process.hbherecoMAHIlagcsv.algorithm.__setattr__('pulseShapeType',cms.int32(3))
+process.hbherecoMAHI = process.hbheprereco.clone()
+process.hbherecoMAHI.algorithm.__setattr__('useM2',cms.bool(False))
+process.hbherecoMAHI.algorithm.__setattr__('useM3',cms.bool(False))
+process.hbherecoMAHI.algorithm.__setattr__('useMahi',cms.bool(True))
+#process.hbherecoMAHI.algorithm.__setattr__('pulseShapeType',cms.int32(3))
 
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
-process.reconstruction_step = cms.Path(process.reconstruction*process.hbheprerecoM2*process.hbheprerecoM3*process.hbheprerecoM2csv*process.hbheprerecoM2lagcsv*process.hbherecoMAHIlagcsv)
+process.reconstruction_step = cms.Path(process.reconstruction*process.hbheprerecoM2*process.hbheprerecoM3*process.hbheprerecoM2new*process.hbheprerecoM3new*process.hbherecoMAHI)
 process.eventinterpretaion_step = cms.Path(process.EIsequence)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
