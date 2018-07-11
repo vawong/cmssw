@@ -1,0 +1,18 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+	sparsecheckout = true
+[remote "official-cmssw"]
+	url = https://github.com/cms-sw/cmssw.git
+	fetch = +refs/heads/*:refs/remotes/official-cmssw/*
+[branch "CMSSW_10_2_X"]
+	remote = official-cmssw
+	merge = refs/heads/CMSSW_10_2_X
+[remote "my-cmssw"]
+	url = https://github.com/vawong/cmssw.git
+	fetch = +refs/heads/*:refs/remotes/my-cmssw/*
+	pushurl = git@github.com:vawong/cmssw.git
+[credential]
+	cache = cache --timeout=86400 --socket /tmp/vawong/.git-credential-cache-socket
