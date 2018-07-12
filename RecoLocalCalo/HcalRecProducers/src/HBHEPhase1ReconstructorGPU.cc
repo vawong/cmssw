@@ -58,7 +58,7 @@
 // Fetcher for reco algorithm data
 #include "RecoLocalCalo/HcalRecAlgos/interface/fetchHcalAlgoData.h"
 
-#include "RecoLocalCalo/HcalRecAlgos/interface/gpu_reco_mahi.h"
+//#include "RecoLocalCalo/HcalRecAlgos/interface/gpu_reco_mahi.h"
 #include "RecoLocalCalo/HcalRecAlgos/interface/gpu_reco_m0.h"
 #define MAX_SIZE_RECHITS 10000
 
