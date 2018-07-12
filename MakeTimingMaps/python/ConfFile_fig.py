@@ -16,15 +16,16 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-
-        'file:$CMSSW_BASE/src/HBHETimingValidation/SubmitData/cfg/step3.root'
-
+    
+     'file:$CMSSW_BASE/src/test.root'
+    
     )
 )
 
-process.timingMaps = cms.EDAnalyzer('MakePhase1Plots')
-
-process.TFileService = cms.Service('TFileService', fileName = cms.string('phase1Plot.root') )
+process.comparisonPlots = cms.EDAnalyzer('MakeComparisonPlots')
 
 
-process.p = cms.Path(process.timingMaps)
+process.TFileService = cms.Service('TFileService', fileName = cms.string('test_v0.root') )
+
+
+process.p = cms.Path(process.comparisonPlots)

@@ -8,4 +8,7 @@
 <use name="SimCalorimetry/HcalSimAlgos"/>
 <use name="SimCalorimetry/CaloSimAlgos"/>
 <use name="Geometry/CaloGeometry"/>
-<flags EDM_PLUGIN="1"/>
+<use name="eigen"/>
+<library file="*.cc" name="MakeComparisonPlotsPlugin">
+<flags EDM_PLUGIN="1" CXXFLAGS="-ggdb"/>
+</library>
