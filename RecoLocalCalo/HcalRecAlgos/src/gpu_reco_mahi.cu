@@ -334,7 +334,8 @@ __device__ void do_fit(Workspace &ws, RecValues &values, int nbx) {
         //
         ws.pulseShapeArray[ibx] = FullSampleVector::Zero(MaxFSVSize);
         ws.pulseDerivArray[ibx] = FullSampleVector::Zero(MaxFSVSize);
-        ws.pulseCovArray[ibx] = FullSampleMatrix::Constant(0);
+        // ws.pulseCovArray[ibx] = FullSampleMatrix::Constant(0);
+        ws.pulseCovArray[ibx] = FullSampleMatrix::Zero(MaxFSVSize,MaxFSVSize);
 
         if (offset == pedestalBX_) 
             ws.ampVec.coeffRef(ibx) = 0;

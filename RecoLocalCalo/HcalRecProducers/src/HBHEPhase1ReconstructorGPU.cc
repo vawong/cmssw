@@ -60,6 +60,7 @@
 // Fetcher for reco algorithm data
 #include "RecoLocalCalo/HcalRecAlgos/interface/fetchHcalAlgoData.h"
 
+#include "RecoLocalCalo/HcalRecAlgos/interface/gpu_reco_m0.h"
 #include "RecoLocalCalo/HcalRecAlgos/interface/gpu_reco_mahi.h"
 #include "RecoLocalCalo/HcalRecAlgos/interface/gpu_common.h"
 
@@ -356,7 +357,8 @@ private:
     void runHBHENegativeEFilter(const HBHEChannelInfo& info, HBHERecHit* rh);
 
     // gpu stuff
-    hcal::mahi::DeviceData ddata_;
+    hcal::m0::DeviceData ddata_;
+    // hcal::mahi::DeviceData ddata_;
     hcal::mahi::PulseShapeData psdata_;
 };
 
@@ -571,7 +573,8 @@ void HBHEPhase1ReconstructorGPU::processData(const Collection& coll,
     }
 
     // perform the reconstruction on the whole vector 
-    hcal::mahi::reco(ddata_, *infos, *rechits, vparams, vcalibs, psdata_, isRealData);
+    hcal::m0::reco(ddata_,*infos,*rechits,vparams,vcalibs,isRealData);
+    //hcal::mahi::reco(ddata_, *infos, *rechits, vparams, vcalibs, psdata_, isRealData);
 
     /*
     for (size_t ihit=0; ihit<infos->size(); ihit++) {
