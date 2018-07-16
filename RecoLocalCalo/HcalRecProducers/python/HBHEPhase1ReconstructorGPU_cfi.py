@@ -68,10 +68,10 @@ hbheprerecogpu = cms.EDProducer(
         useM2 = cms.bool(False),
 
         # Use "Method 3"?
-        useM3 = cms.bool(True),
+        useM3 = cms.bool(False),
 
         # Use Mahi?
-        useMahi = cms.bool(True)
+        useMahi = cms.bool(False)
     ),
 
     # Reconstruction algorithm configuration data to fetch from DB, if any
@@ -79,28 +79,32 @@ hbheprerecogpu = cms.EDProducer(
 
     # Turn rechit status bit setters on/off
     setNegativeFlagsQIE8 = cms.bool(True),
-    setNegativeFlagsQIE11 = cms.bool(False),
+    setNegativeFlagsQIE11 = cms.bool(True),
     setNoiseFlagsQIE8 = cms.bool(True),
-    setNoiseFlagsQIE11 = cms.bool(False),
+    setNoiseFlagsQIE11 = cms.bool(True),
     setPulseShapeFlagsQIE8 = cms.bool(True),
-    setPulseShapeFlagsQIE11 = cms.bool(False),
+    setPulseShapeFlagsQIE11 = cms.bool(True),
     setLegacyFlagsQIE8 = cms.bool(True),
-    setLegacyFlagsQIE11 = cms.bool(False),
+    setLegacyFlagsQIE11 = cms.bool(True),
 
     # Parameter sets configuring rechit status bit setters
     flagParametersQIE8 = cms.PSet(
         hbheStatusFlag.qie8Config
     ),
-    flagParametersQIE11 = cms.PSet(),
-
+    flagParametersQIE11 = cms.PSet(
+	hbheStatusFlag.qie11Config
+    ),
     pulseShapeParametersQIE8 = cms.PSet(
         pulseShapeFlag.qie8Parameters
     ),
-    pulseShapeParametersQIE11 = cms.PSet()
+    pulseShapeParametersQIE11 = cms.PSet(
+	pulseShapeFlag.qie11Parameters
+    )
 )
 
 # Disable the "triangle peak fit" and the corresponding HBHETriangleNoise flag
 hbheprerecogpu.pulseShapeParametersQIE8.TrianglePeakTS = cms.uint32(10000)
+hbheprerecogpu.pulseShapeParametersQIE11.TrianglePeakTS = cms.uint32(10000)
 
 from Configuration.Eras.Modifier_run2_HE_2017_cff import run2_HE_2017
 run2_HE_2017.toModify(hbheprerecogpu, saveEffectivePedestal = cms.bool(True))

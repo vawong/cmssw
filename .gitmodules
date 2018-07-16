@@ -1,0 +1,3 @@
+[submodule "HBHETimingValidation"]
+	path = HBHETimingValidation
+	url = https://github.com/mariadalfonso/HBHETimingValidation.git

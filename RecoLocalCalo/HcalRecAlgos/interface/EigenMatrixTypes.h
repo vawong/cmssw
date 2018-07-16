@@ -1,7 +1,9 @@
 #ifndef RecoLocalCalo_HcalRecAlgos_EigenMatrixTypes_h
 #define RecoLocalCalo_HcalRecAlgos_EigenMatrixTypes_h
 
-#include <Eigen/Dense>
+#include <iostream>
+//#include <Eigen/Dense>
+#include "Eigen/Dense"
 
 constexpr int MaxSVSize=10;
 constexpr int MaxFSVSize=19;
