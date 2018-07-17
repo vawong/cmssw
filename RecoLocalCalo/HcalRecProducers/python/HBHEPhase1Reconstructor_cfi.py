@@ -78,14 +78,14 @@ hbheprereco = cms.EDProducer(
     algoConfigClass = cms.string(""),
 
     # Turn rechit status bit setters on/off
-    setNegativeFlagsQIE8 = cms.bool(True),
-    setNegativeFlagsQIE11 = cms.bool(True),
-    setNoiseFlagsQIE8 = cms.bool(True),
-    setNoiseFlagsQIE11 = cms.bool(True),
-    setPulseShapeFlagsQIE8 = cms.bool(True),
-    setPulseShapeFlagsQIE11 = cms.bool(True),
-    setLegacyFlagsQIE8 = cms.bool(True),
-    setLegacyFlagsQIE11 = cms.bool(True),
+    setNegativeFlagsQIE8 = cms.bool(False),
+    setNegativeFlagsQIE11 = cms.bool(False),
+    setNoiseFlagsQIE8 = cms.bool(False),
+    setNoiseFlagsQIE11 = cms.bool(False),
+    setPulseShapeFlagsQIE8 = cms.bool(False),
+    setPulseShapeFlagsQIE11 = cms.bool(False),
+    setLegacyFlagsQIE8 = cms.bool(False),
+    setLegacyFlagsQIE11 = cms.bool(False),
 
     # Parameter sets configuring rechit status bit setters
     flagParametersQIE8 = cms.PSet(
