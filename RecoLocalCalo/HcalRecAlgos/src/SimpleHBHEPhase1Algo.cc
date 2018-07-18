@@ -71,13 +71,22 @@ HBHERecHit SimpleHBHEPhase1Algo::reconstruct(const HBHEChannelInfo& info,
         int ibeg = static_cast<int>(info.soi()) + firstSampleShift_;
         if (ibeg < 0)
             ibeg = 0;
-        const int nSamplesToAdd = params ? params->samplesToAdd() : samplesToAdd_;
+        // const int nSamplesToAdd = params ? params->samplesToAdd() : samplesToAdd_;
+        const int nSamplesToAdd = 2;
         const double fc_ampl = info.chargeInWindow(ibeg, ibeg + nSamplesToAdd);
-        const bool applyContainment = params ? params->correctForPhaseContainment() : corrFPC_;
+        // const bool applyContainment = params ? params->correctForPhaseContainment() : corrFPC_;
+        const bool applyContainment = 0;
         const float phasens = params ? params->correctionPhaseNS() : phaseNS_;
         m0E = m0Energy(info, fc_ampl, applyContainment, phasens, nSamplesToAdd);
-        m0E *= hbminusCorrectionFactor(channelId, m0E, isData);
+       //  m0E *= hbminusCorrectionFactor(channelId, m0E, isData);
         m0t = m0Time(info, fc_ampl, calibs, nSamplesToAdd);
+     //    std::cout << "----------------- CPU ------------" << std::endl;
+    	// std::cout << "nSamplesToAdd: " << nSamplesToAdd << std::endl;
+    	// std::cout << "fc_ampl: " << fc_ampl << std::endl;
+    	// std::cout << "applyContainment: " << applyContainment << std::endl;
+    	// std::cout << "phasens: " << phasens << std::endl;
+    	// std::cout << "m0E :" << m0E << std::endl;
+    	// std::cout << "channelID: " << channelId << std::endl;
     }
 
     // Run "Method 2"

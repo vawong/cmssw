@@ -2,6 +2,7 @@
 #include "RecoLocalCalo/HcalRecAlgos/interface/gpu_common.h"
 
 #include <iostream>
+#include <stdio.h>
 
 namespace hcal { namespace m0 {
 
@@ -51,7 +52,7 @@ __device__ float get_time(HBHEChannelInfo& info, float fc_ampl,
 __global__ void kernel_reco(HBHEChannelInfo *vinfos, HBHERecHit *vrechits, 
                             HcalRecoParam *vparams, HcalCalibrations *vcalibs, int size) {
     int idx = threadIdx.x + blockIdx.x*blockDim.x;
-
+    
     if (idx < size) {
         auto info = vinfos[idx];
         auto params = vparams[idx];
@@ -59,21 +60,26 @@ __global__ void kernel_reco(HBHEChannelInfo *vinfos, HBHERecHit *vrechits,
 
         int ibeg = static_cast<int>(info.soi()) + firstSampleShift;
         if (ibeg<0) ibeg=0;
-        int const nsamples_to_add = params.samplesToAdd();
+        // int const nsamples_to_add = params.samplesToAdd();
+        int const nsamples_to_add = 2;
         double const fc_ampl = info.chargeInWindow(ibeg, ibeg + nsamples_to_add);
-        bool const applyContainment = params.correctForPhaseContainment();
+        // bool const applyContainment = params.correctForPhaseContainment();
+        bool const applyContainment = 0;
         float const phasens = params.correctionPhaseNS();
 
         // skip containment correction for now...
-        float energy = info.energyInWindow(ibeg, ibeg+nsamples_to_add);
+        float energy = info.energyInWindow(ibeg, ibeg+nsamples_to_add);        
         float time = get_time(info, fc_ampl, calibs, nsamples_to_add);
 
         // set the values for the rec hit
-        auto rechit = HBHERecHit(info.id(), energy, time, info.soiRiseTime());
-    
+        auto rechit = HBHERecHit(info.id(), energy, time, info.soiRiseTime()); 
+
+        //printf("------GPU-------- %s, idx: %f , nsamples_to_add: %d, applyContainment: %d, phasens: %f, fc_ampl: %f , id: %d , energy: %f\n",
+          //" ",(int)idx,  (int)nsamples_to_add, (int)applyContainment, (float)phasens, 3(double)fc_ampl, info.id(), (float)energy);
         // set the correct rec hit
         vrechits[idx] = rechit;
     }
+
 }
 
 /// method 0 reconstruction
