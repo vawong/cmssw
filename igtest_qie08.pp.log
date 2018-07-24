@@ -1,0 +1,176 @@
+*** IgProf(11333, 1532436506.542): profiler activated in cmsRun, main thread id 0x7f072e093480
+*** IgProf(11333, 1532436506.542): profiler options: igprof:out='|gzip -c>igtest_qie08.pp.gz' perf
+*** IgProf(11333, 1532436506.542): timing resolution is 0.005000 s
+*** IgProf(11333, 1532436506.545): exit (0x7f072f925c10): instrumenting 9 bytes into 0x7f0730bed004
+*** IgProf(11333, 1532436506.548): _exit (0x7f072f9b18d0): instrumenting 10 bytes into 0x7f0730bee004
+*** IgProf(11333, 1532436506.551): kill (0x7f072f922540): instrumenting 5 bytes into 0x7f0730bef004
+*** IgProf(11333, 1532436506.555): pthread_create (0x7f072fcc20a0): instrumenting 6 bytes into 0x7f0730bf0004
+*** IgProf(11333, 1532436506.555): exit (0x7f072f925c10): hook trampoline already installed, ignoring
+*** IgProf(11333, 1532436506.555): _exit (0x7f072f9b18d0): hook trampoline already installed, ignoring
+*** IgProf(11333, 1532436506.555): kill (0x7f072f922540): hook trampoline already installed, ignoring
+*** IgProf(11333, 1532436506.555): dlsym(self, 'pthread_create'): cmsRun: undefined symbol: pthread_create, version GLIBC_2.0
+*** IgProf(11333, 1532436506.555): dlsym(self, 'pthread_create'): cmsRun: undefined symbol: pthread_create, version GLIBC_2.1
+*** IgProf(11333, 1532436506.555): performance profiler: measuring process cpu time
+*** IgProf(11333, 1532436506.555): fork (0x7f072fccac30): jump instruction found, but not a hook target
+*** IgProf(11333, 1532436506.558): fork (0x7f072fccac30): instrumenting 5 bytes into 0x7f0730bf1004
+*** IgProf(11333, 1532436506.558): system (0x7f072fcc95c0): jump instruction found, but not a hook target
+*** IgProf(11333, 1532436506.561): system (0x7f072fcc95c0): instrumenting 5 bytes into 0x7f0730bf2004
+*** IgProf(11333, 1532436506.564): pthread_sigmask (0x7f072fcc6960): instrumenting 7 bytes into 0x7f0730bf3004
+*** IgProf(11333, 1532436506.567): sigaction (0x7f072fcc98d0): instrumenting 6 bytes into 0x7f0730bf4004
+*** IgProf(11333, 1532436506.570): close (0x7f072fcc8830): instrumenting 7 bytes into 0x7f0730bf5004
+*** IgProf(11333, 1532436506.573): fclose (0x7f072f959ed0): instrumenting 6 bytes into 0x7f0730bf6004
+*** IgProf(11333, 1532436506.573): performance profiler enabled
+YEAR =  2017  TYPE =  globalRun
+*** IgProf(11345, 1532436507.351): current process not selected for profiling: process 'sh' does not match 'cmsRun'
+*** IgProf(11348, 1532436507.378): current process not selected for profiling: process 'sh' does not match 'cmsRun'
+*** IgProf(11351, 1532436507.402): current process not selected for profiling: process 'sh' does not match 'cmsRun'
+*** IgProf(11354, 1532436507.427): current process not selected for profiling: process 'sh' does not match 'cmsRun'
+*** IgProf(11357, 1532436507.489): current process not selected for profiling: process 'sh' does not match 'cmsRun'
+*** IgProf(11359, 1532436507.516): current process not selected for profiling: process 'sh' does not match 'cmsRun'
+*** IgProf(11362, 1532436507.528): current process not selected for profiling: process 'awk' does not match 'cmsRun'
+*** IgProf(11363, 1532436507.528): current process not selected for profiling: process 'grep' does not match 'cmsRun'
+*** IgProf(11376, 1532436508.017): current process not selected for profiling: process 'sh' does not match 'cmsRun'
+*** IgProf(11333, 1532436508.744): pthread_sigmask(): prevented profiling signal 27 from being blocked in thread 0x7f072e093480 [handler 0x7f0732ad1d30, interval 5000 us]
+*** IgProf(11333, 1532436508.744): pthread_sigmask(): prevented profiling signal 27 from being blocked in thread 0x7f072e093480 [handler 0x7f0732ad1d30, interval 5000 us]
+*** IgProf(11333, 1532436508.744): pthread_sigmask(): prevented profiling signal 27 from being blocked in thread 0x7f072e093480 [handler 0x7f0732ad1d30, interval 5000 us]
+*** IgProf(11333, 1532436508.744): pthread_sigmask(): prevented profiling signal 27 from being blocked in thread 0x7f072e093480 [handler 0x7f0732ad1d30, interval 5000 us]
+*** IgProf(11333, 1532436508.744): captured thread id 0x7f071b1c1700 for profiling (0x7f07302aac30(0x7f072910fb20))
+*** IgProf(11333, 1532436508.744): pthread_sigmask(): prevented profiling signal 27 from being blocked in thread 0x7f072e093480 [handler 0x7f0732ad1d30, interval 5000 us]
+*** IgProf(11333, 1532436508.744): pthread_sigmask(): prevented profiling signal 27 from being blocked in thread 0x7f072e093480 [handler 0x7f0732ad1d30, interval 5000 us]
+*** IgProf(11333, 1532436508.744): pthread_sigmask(): prevented profiling signal 27 from being blocked in thread 0x7f072e093480 [handler 0x7f0732ad1d30, interval 5000 us]
+*** IgProf(11398, 1532436508.927): current process not selected for profiling: process 'sh' does not match 'cmsRun'
+*** IgProf(11398, 1532436508.940): current process not selected for profiling: process '/usr/bin/bash' does not match 'cmsRun'
+*** IgProf(11403, 1532436508.962): current process not selected for profiling: process 'cat' does not match 'cmsRun'
+24-Jul-2018 14:48:34 CEST  Initiating request to open file file:/data/ml/vawong/CMSSW_10_2_X_2018-07-15-2300/src/test_hcal_numEvent100.root
+24-Jul-2018 14:48:35 CEST  Successfully opened file file:/data/ml/vawong/CMSSW_10_2_X_2018-07-15-2300/src/test_hcal_numEvent100.root
+*** IgProf(11333, 1532436516.235): captured thread id 0x7f06fdec1700 for profiling (0x7f0710f87550(0x7f07058710b0))
+*** IgProf(11333, 1532436516.260): captured thread id 0x7f06fb3ff700 for profiling (0x7f0710f87550(0x7f070a39c360))
+*** IgProf(11333, 1532436516.531): captured thread id 0x7f06f8dff700 for profiling (0x7f0710f87550(0x7f0705080540))
+Begin processing the 1st record. Run 305064, Event 667060, LumiSection 1 on stream 0 at 24-Jul-2018 14:48:41.633 CEST
+size = 1815
+24-Jul-2018 14:48:42 CEST  Closed file file:/data/ml/vawong/CMSSW_10_2_X_2018-07-15-2300/src/test_hcal_numEvent100.root
+
+TrigReport ---------- Event  Summary ------------
+TrigReport Events total = 1 passed = 1 failed = 0
+
+TrigReport ---------- Path   Summary ------------
+TrigReport  Trig Bit#   Executed     Passed     Failed      Error Name
+TrigReport     1    0          1          1          0          0 digiPath
+TrigReport     1    1          1          1          0          0 recoPath
+
+TrigReport -------End-Path   Summary ------------
+TrigReport  Trig Bit#   Executed     Passed     Failed      Error Name
+TrigReport     0    0          1          1          0          0 finalize
+
+TrigReport ---------- Modules in Path: digiPath ------------
+TrigReport  Trig Bit#    Visited     Passed     Failed      Error Name
+TrigReport     1    0          1          1          0          0 hcalDigis
+
+TrigReport ---------- Modules in Path: recoPath ------------
+TrigReport  Trig Bit#    Visited     Passed     Failed      Error Name
+TrigReport     1    0          1          1          0          0 horeco
+TrigReport     1    1          1          1          0          0 hfprereco
+TrigReport     1    2          1          1          0          0 hfreco
+TrigReport     1    3          1          1          0          0 hbheprereco
+TrigReport     1    4          1          1          0          0 hbheprerecogpu
+
+TrigReport ------ Modules in End-Path: finalize ------------
+TrigReport  Trig Bit#    Visited     Passed     Failed      Error Name
+TrigReport     0    0          1          1          0          0 Out
+
+TrigReport ---------- Module Summary ------------
+TrigReport    Visited   Executed     Passed     Failed      Error Name
+TrigReport          1          1          1          0          0 Out
+TrigReport          1          1          1          0          0 TriggerResults
+TrigReport          1          1          1          0          0 digiPath
+TrigReport          1          1          1          0          0 finalize
+TrigReport          1          1          1          0          0 hbheprereco
+TrigReport          1          1          1          0          0 hbheprerecogpu
+TrigReport          1          1          1          0          0 hcalDigis
+TrigReport          1          1          1          0          0 hfprereco
+TrigReport          1          1          1          0          0 hfreco
+TrigReport          1          1          1          0          0 horeco
+TrigReport          1          1          1          0          0 recoPath
+
+TimeReport ---------- Event  Summary ---[sec]----
+TimeReport       event loop CPU/event = 2.941219
+TimeReport      event loop Real/event = 6.974939
+TimeReport     sum Streams Real/event = 0.402867
+TimeReport efficiency CPU/Real/thread = 0.421684
+
+TimeReport ---------- Path   Summary ---[Real sec]----
+TimeReport  per event     per exec  Name
+TimeReport   0.089533     0.089533  digiPath
+TimeReport   0.089550     0.089550  recoPath
+TimeReport  per event     per exec  Name
+
+TimeReport -------End-Path   Summary ---[Real sec]----
+TimeReport  per event     per exec  Name
+TimeReport   0.401274     0.401274  finalize
+TimeReport  per event     per exec  Name
+
+TimeReport ---------- Modules in Path: digiPath ---[Real sec]----
+TimeReport  per event    per visit  Name
+TimeReport   0.008095     0.008095  hcalDigis
+
+TimeReport ---------- Modules in Path: recoPath ---[Real sec]----
+TimeReport  per event    per visit  Name
+TimeReport   0.024508     0.024508  horeco
+TimeReport   0.003636     0.003636  hfprereco
+TimeReport   0.001943     0.001943  hfreco
+TimeReport   0.023782     0.023782  hbheprereco
+TimeReport   0.007424     0.007424  hbheprerecogpu
+TimeReport  per event    per visit  Name
+
+TimeReport ------ Modules in End-Path: finalize ---[Real sec]----
+TimeReport  per event    per visit  Name
+TimeReport   0.308102     0.308102  Out
+TimeReport  per event    per visit  Name
+
+TimeReport ---------- Module Summary ---[Real sec]----
+TimeReport  per event     per exec    per visit  Name
+TimeReport   0.308102     0.308102     0.308102  Out
+TimeReport   0.000008     0.000008     0.000008  TriggerResults
+TimeReport   0.000002     0.000002     0.000002  digiPath
+TimeReport   0.000015     0.000015     0.000015  finalize
+TimeReport   0.023782     0.023782     0.023782  hbheprereco
+TimeReport   0.007424     0.007424     0.007424  hbheprerecogpu
+TimeReport   0.008095     0.008095     0.008095  hcalDigis
+TimeReport   0.003636     0.003636     0.003636  hfprereco
+TimeReport   0.001943     0.001943     0.001943  hfreco
+TimeReport   0.024508     0.024508     0.024508  horeco
+TimeReport   0.000009     0.000009     0.000009  recoPath
+TimeReport  per event     per exec    per visit  Name
+
+T---Report end!
+
+
+=============================================
+
+MessageLogger Summary
+
+ type     category        sev    module        subroutine        count    total
+ ---- -------------------- -- ---------------- ----------------  -----    -----
+    1 fileAction           -s file_close                             1        1
+    2 fileAction           -s file_open                              2        2
+
+ type    category    Examples: run/evt        run/evt          run/evt
+ ---- -------------------- ---------------- ---------------- ----------------
+    1 fileAction           PostGlobalEndRun                  
+    2 fileAction           pre-events       pre-events       
+
+Severity    # Occurrences   Total Occurrences
+--------    -------------   -----------------
+System                  3                   3
+
+dropped waiting message count 0
+*** IgProf(11333, 1532436523.648): pthread_sigmask(): prevented profiling signal 27 from being blocked in thread 0x7f072e093480 [handler 0x7f0732ad1d30, interval 5000 us]
+*** IgProf(11333, 1532436523.648): pthread_sigmask(): prevented profiling signal 27 from being blocked in thread 0x7f072e093480 [handler 0x7f0732ad1d30, interval 5000 us]
+*** IgProf(11333, 1532436523.648): pthread_sigmask(): prevented profiling signal 27 from being blocked in thread 0x7f072e093480 [handler 0x7f0732ad1d30, interval 5000 us]
+*** IgProf(11333, 1532436523.648): pthread_sigmask(): prevented profiling signal 27 from being blocked in thread 0x7f072e093480 [handler 0x7f0732ad1d30, interval 5000 us]
+*** IgProf(11333, 1532436523.649): exit(0) called in thread 0x7f072e093480
+*** IgProf(11333, 1532436523.834): final exit in thread 0x7f072e093480, saving profile data
+*** IgProf(11333, 1532436523.834): dumping state to |gzip -c>igtest_qie08.pp.gz
+*** IgProf(11333, 1532436524.023): trace perf: ntraces=1921 depth=[av 37.5, rms 30.0] ticks=[av 171002.4, rms 1314792.8] ticks-per-depth=[av 7080.9, rms 107875.0]
+*** IgProf(11333, 1532436524.023): igprof quitting
+*** IgProf(11333, 1532436524.024): _exit(0) called in thread 0x7f072e093480

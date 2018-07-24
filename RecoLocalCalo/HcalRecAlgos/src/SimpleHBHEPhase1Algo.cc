@@ -238,10 +238,11 @@ float SimpleHBHEPhase1Algo::m0Time(const HBHEChannelInfo& info,
             if (minA < 0.f) { maxA-=minA; t0-=minA; t2-=minA; }
             float wpksamp = (t0 + maxA + t2);
             if (wpksamp) wpksamp = (maxA + 2.f*t2) / wpksamp;
-            time = (maxI - soi)*25.f + timeshift_ns_hbheho(wpksamp);
+	        time = (maxI - soi)*25.f;
+            //time = (maxI - soi)*25.f + timeshift_ns_hbheho(wpksamp);
 
             // Legacy QIE8 timing correction
-            time -= hcalTimeSlew_delay_->delay(std::max(1.0, fc_ampl), HcalTimeSlew::Medium);
+            //time -= hcalTimeSlew_delay_->delay(std::max(1.0, fc_ampl), HcalTimeSlew::Medium);
             // Time calibration
             time -= calibs.timecorr();
         }

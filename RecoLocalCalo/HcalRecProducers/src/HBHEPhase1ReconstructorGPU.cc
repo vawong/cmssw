@@ -725,6 +725,31 @@ HBHEPhase1ReconstructorGPU::produce(edm::Event& e, const edm::EventSetup& eventS
             hbheFlagSetterQIE11_->SetFlagsFromRecHits(*out);
     }
 
+    // TODO: need to figure out a way to combine kernel processing
+    // std::map<TString, std::list<auto>> processes = {
+    //     {"HBHEDatFrame", {*hbDigis, *conditions, *p, *mycomputer, 
+    //                     isData, &channelInfo, infos.get(), out.get()}},
+    //     {"QIE11DataFrame", {*heDigis, *conditions, *p, *mycomputer, 
+    //                         isData, &channelInfo11, infos.get(), out.get()}}
+    // }
+
+    // //
+    // if (processQIE8_ && processQIE11_)
+    // {
+    //     if (setNoiseFlagsQIE8_ && setNoiseFlagsQIE11_)
+    //         hbheFlagSetterQIE8_->Clear();
+    //         hbheFlagSetterQIE11_->Clear();
+
+    //     HBHEChannelInfo channelInfo(false,false);
+    //     HBHEChannelInfo channelInfo11(true, saveEffectivePedestal_);
+    //     for (Int_t i=0; i<2; i++){
+    //         processData<processes[i][0]>(processes[i][1]);
+    //     }
+
+    //     if (setNoiseFlagsQIE8_ && setNoiseFlagsQIE11_)
+    //         hbheFlagSetterQIE8_->SetFlagsFromRecHits(*out);
+    //         hbheFlagSetterQIE11_->SetFlagsFromRecHits(*out);
+    // } 
     // Add the output collections to the event record
     if (saveInfos_)
         e.put(std::move(infos));

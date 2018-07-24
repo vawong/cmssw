@@ -17,7 +17,7 @@ hbheprerecogpu = cms.EDProducer(
     # Label for the input QIE11DigiCollection, and flag indicating
     # whether we should process this collection
     digiLabelQIE11 = cms.InputTag("hcalDigis"),
-    processQIE11 = cms.bool(True),
+    processQIE11 = cms.bool(False),
 
     # Get the "sample of interest" index from DB?
     # If not, it is taken from the dataframe.
@@ -91,12 +91,15 @@ hbheprerecogpu = cms.EDProducer(
     flagParametersQIE8 = cms.PSet(
         hbheStatusFlag.qie8Config
     ),
-    flagParametersQIE11 = cms.PSet(),
-
+    flagParametersQIE11 = cms.PSet(
+	hbheStatusFlag.qie11Config	
+    ),
     pulseShapeParametersQIE8 = cms.PSet(
         pulseShapeFlag.qie8Parameters
     ),
-    pulseShapeParametersQIE11 = cms.PSet()
+    pulseShapeParametersQIE11 = cms.PSet(
+	pulseShapeFlag.qie11Parameters
+    )
 )
 
 # Disable the "triangle peak fit" and the corresponding HBHETriangleNoise flag
