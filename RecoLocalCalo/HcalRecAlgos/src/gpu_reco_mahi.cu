@@ -1,5 +1,6 @@
 #include "RecoLocalCalo/HcalRecAlgos/interface/gpu_reco_mahi.h"
 #include "RecoLocalCalo/HcalRecAlgos/interface/gpu_common.h"
+#include "CalibCalorimetry/HcalAlgos/interface/HcalTimeSlew.h"
 
 #include <iostream>
 
@@ -143,58 +144,75 @@ __device__ void nnls_constrain_parameter(Workspace &ws, Eigen::Index minratioidx
     --ws.nP;
 }
 
-/*
+
 __device__ void solve_submatrix(Workspace &ws) {
     switch (ws.nP) {
     case 10:
         {
             auto tmp = ws.aTaMat;
-
-            aTbVec
-                ampvecpermtest
+            ws.ampvecpermtest.head(10) = tmp.ldlt().solve(ws.aTbVec.head(10));
         }
         break;
     case 9:
         {
+            auto tmp = ws.aTaMat.topLeftCorner(9,9);
+            ws.ampvecpermtest.head(9) = tmp.ldlt().solve(ws.aTbVec.head(9));
         }
         break;
-    case 9:
+    case 8:
         {
+            auto tmp = ws.aTaMat.topLeftCorner(8,8);
+            ws.ampvecpermtest.head(8) = tmp.ldlt().solve(ws.aTbVec.head(8));
         }
         break;
-    case 9:
+    case 7:
         {
+            auto tmp = ws.aTaMat.topLeftCorner(7,7);
+            ws.ampvecpermtest.head(7) = tmp.ldlt().solve(ws.aTbVec.head(7));
         }
         break;
-    case 9:
+    case 6:
         {
+            auto tmp = ws.aTaMat.topLeftCorner(6,6);
+            ws.ampvecpermtest.head(6) = tmp.ldlt().solve(ws.aTbVec.head(6));
         }
         break;
-    case 9:
+    case 5:
         {
+            auto tmp = ws.aTaMat.topLeftCorner(5,5);
+            ws.ampvecpermtest.head(5) = tmp.ldlt().solve(ws.aTbVec.head(5));
         }
         break;
-    case 9:
+    case 4:
         {
+            auto tmp = ws.aTaMat.topLeftCorner(4,4);
+            ws.ampvecpermtest.head(4) = tmp.ldlt().solve(ws.aTbVec.head(4));
         }
         break;
-    case 9:
+    case 3:
         {
+            auto tmp = ws.aTaMat.topLeftCorner(3,3);
+            ws.ampvecpermtest.head(3) = tmp.ldlt().solve(ws.aTbVec.head(3));
         }
         break;
-    case 9:
+    case 2:
         {
+            auto tmp = ws.aTaMat.topLeftCorner(2,2);
+            ws.ampvecpermtest.head(2) = tmp.ldlt().solve(ws.aTbVec.head(2));
         }
         break;
-    case 9:
+    case 1:
         {
+            auto tmp = ws.aTaMat.topLeftCorner(1,1);
+            ws.ampvecpermtest.head(1) = tmp.ldlt().solve(ws.aTbVec.head(1));
         }
         break;
     default:
+        println("throw Error")
         return;
     }
 }
-*/
+
 
 __device__ void nnls(Workspace &ws) {
     unsigned int const npulse = ws.nPulseTot;
@@ -252,7 +270,8 @@ __device__ void nnls(Workspace &ws) {
     
             // solveSubmatrix()
             // TODO
-            //solve_submatrix(ws.aTaMat, ws.aTbVec, ws.ampvecpermtest, ws.nP);
+            // solve_submatrix(ws.aTaMat, ws.aTbVec, ws.ampvecpermtest, ws.nP);
+            solve_submatrix(ws);
             ws.ampvecpermtest.head(ws.nP) = ws.aTaMat.topLeftCorner(ws.nP, ws.nP).ldlt().solve(ws.aTbVec.head(ws.nP));
 
             // check solution
@@ -411,7 +430,7 @@ __device__ void do_fit(Workspace &ws, RecValues &values, int nbx) {
         //
         ws.pulseShapeArray[ibx] = FullSampleVector::Zero(MaxFSVSize);
         ws.pulseDerivArray[ibx] = FullSampleVector::Zero(MaxFSVSize);
-        ws.pulseCovArray[ibx] = FullSampleMatrix::Constant(0);
+        ws.pulseCovArray[ibx] = FullSampleMatrix::Zero(MaxFSVSize, MaxFSVSize);
 
         if (offset == pedestalBX_) 
             ws.ampVec.coeffRef(ibx) = 0;
@@ -506,14 +525,20 @@ __device__ float get_time(HBHEChannelInfo& info, float fc_ampl,
     return time;
 }
 
-/// method 0 kernel
+/// mahi kernel - equivalent to phase1Apply
 __global__ void kernel_reco(HBHEChannelInfo *vinfos, HBHERecHit *vrechits, 
                             HcalRecoParam *vparams, HcalCalibrations *vcalibs, 
                             int* hashes, float* psdata, int size) {
     int idx = threadIdx.x + blockIdx.x*blockDim.x;
-
+    // printf("HAPPENING HERE");
     if (idx < size) {
         auto info = vinfos[idx];
+        //auto info = vinfos;
+        // printf("info1: %d", info);
+        // printf("HcalDetId info ---------");
+        printf("info: %d",info.id());
+        // printf("%d", info.id().depth());
+        // printf("%d", info.id().iphi());
         auto params = vparams[idx];
         auto calibs = vcalibs[idx];
 
@@ -526,9 +551,11 @@ __global__ void kernel_reco(HBHEChannelInfo *vinfos, HBHERecHit *vrechits,
         // workspace
         auto *pshape = psdata + hashes[info.recoShape()];
         Workspace ws;
-        ws.functor.assign(pshape, false, false, false, 1, 0, 0, 10);
+        ws.functor.assign(pshape, false, false, false, 1, 0, 0, 10); //from setPulseShapeTemplate
         ws.tsSize = info.nSamples();
-        ws.tsOffset = info.soi();
+        // ws.tsOffset = info.soi();
+        ws.tsOffset = 0;
+        //printf("tsOffset = %d", ws.tsOffset);
         ws.fullTSOffset = fullTSofInterest_ - ws.tsOffset;
 
         println("cted workspace and obtained the pulse shape data");
@@ -557,7 +584,9 @@ __global__ void kernel_reco(HBHEChannelInfo *vinfos, HBHERecHit *vrechits,
         double tstot = 0, tstrig = 0;
         for (unsigned int iTS=0; iTS<ws.tsSize; ++iTS) {
             double charge = info.tsRawCharge(iTS);
+            //printf("charge = %d", charge);
             double ped = info.tsPedestal(iTS);
+            //printf("ped = %d", ped);
             ws.amplitudes.coeffRef(iTS) = charge - ped;
 
             // adc granularity
@@ -616,6 +645,7 @@ __global__ void kernel_reco(HBHEChannelInfo *vinfos, HBHERecHit *vrechits,
         float energy = recValues.energy * info.tsGain(0);
         float time = recValues.time;
         float chi2 = recValues.chi2;
+        // printf("GPU --------------------------- energy = %d, time = %d, chi2 = %d", energy, time, chi2);
 
         // set the values for the rec hit and put it into the correct array cell
         auto rechit = HBHERecHit(info.id(), energy, time, info.soiRiseTime());
@@ -645,6 +675,9 @@ void reco(DeviceData ddata,
     // call the kernel
     int nthreadsPerBlock = 256;
     int nblocks = (vinfos.size() + nthreadsPerBlock - 1) / nthreadsPerBlock;
+    // std::cout << "info id: " << vinfos[0].id() << std::endl;
+    const char *ref = new char(vinfos[0].id());
+    if (strcmp(ref,"(HB -1,1,1)")!=0) std::cout << "THIS HAPPENED: " << ref << std::endl;
     kernel_reco<<<nblocks, nthreadsPerBlock>>>(ddata.vinfos, ddata.vrechits, 
         ddata.vparams, ddata.vcalibs, psdata.hashes, psdata.data, vinfos.size());
     cudaDeviceSynchronize();

@@ -48,7 +48,9 @@ void MahiFit::phase1Apply(const HBHEChannelInfo& channelData,
   resetWorkspace();
 
   nnlsWork_.tsSize = channelData.nSamples();
+  //std::cout << "CPU tsSize = " << nnlsWork_.tsSize << std::endl;
   nnlsWork_.tsOffset = channelData.soi();
+  //std::cout << "CPU tsOffset = " << nnlsWork_.fullTSOffset << std::endl;
   nnlsWork_.fullTSOffset = fullTSofInterest_ - nnlsWork_.tsOffset;
 
   // 1 sigma time constraint
@@ -71,7 +73,9 @@ void MahiFit::phase1Apply(const HBHEChannelInfo& channelData,
   double tsTOT = 0, tstrig = 0; // in GeV
   for(unsigned int iTS=0; iTS<nnlsWork_.tsSize; ++iTS){
     double charge = channelData.tsRawCharge(iTS);
+    //std::cout << "CPU charge : " << charge << std::endl;
     double ped = channelData.tsPedestal(iTS);
+    //std::cout << "CPU ped: " << ped << std::endl;
 
     nnlsWork_.amplitudes.coeffRef(iTS) = charge - ped;
 
@@ -123,6 +127,10 @@ void MahiFit::phase1Apply(const HBHEChannelInfo& channelData,
   reconstructedTime = reconstructedVals[1];
   chi2 = reconstructedVals[2];
 
+  //std::cout << "CPU ----------------------" << std::endl;
+  //std::cout << "energy: " << reconstructedEnergy << std::endl;
+  //std::cout << "time: " << reconstructedTime << std::endl;
+  //std::cout << "chi2: " << chi2 << std::endl;
 }
 
 void MahiFit::doFit(std::array<float,3> &correctedOutput, int nbx) const {

@@ -63,7 +63,8 @@ HBHERecHit SimpleHBHEPhase1Algo::reconstruct(const HBHEChannelInfo& info,
 {
     HBHERecHit rh;
 
-    const HcalDetId channelId(info.id());
+    // std::cout << "channelID: " << info.id() << std::endl; 
+    const HcalDetId channelId(info.id()); 
 
     // Calculate "Method 0" quantities
     float m0t = 0.f, m0E = 0.f;
@@ -123,6 +124,7 @@ HBHERecHit SimpleHBHEPhase1Algo::reconstruct(const HBHEChannelInfo& info,
     float rhX = -1.f;
     if (mahi) 
     {
+      // std::cout << "CPU ID: " << info.id() << std::endl;
       rhE = m4E;
       rht = m4T;
       rhX = m4chi2;
